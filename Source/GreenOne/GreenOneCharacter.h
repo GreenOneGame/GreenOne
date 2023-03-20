@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "GreenOneCharacter.generated.h"
+
+class UInputAction;
 
 UCLASS(config=Game)
 class AGreenOneCharacter : public ACharacter
@@ -18,6 +21,16 @@ class AGreenOneCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PauseAction;
+	
 public:
 	AGreenOneCharacter();
 
@@ -27,11 +40,7 @@ public:
 
 protected:
 
-	/** Called for forwards/backward input */
-	void MoveForward(float Value);
-
-	/** Called for side to side input */
-	void MoveRight(float Value);
+	void Move(const FInputActionValue& Value);
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -55,6 +64,8 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+	virtual void BeginPlay();
 
 public:
 	/** Returns CameraBoom subobject **/
