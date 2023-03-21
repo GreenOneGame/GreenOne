@@ -1,4 +1,2 @@
 # GreenOne
 Meilleur team EUW
-
-###
