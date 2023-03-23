@@ -7,19 +7,11 @@
 
 EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	AAIController* ControllerRef = OwnerComp.GetAIOwner();
-	if (!ControllerRef)
-	{
-		return EBTNodeResult::Failed;
-	}
-	if (!ControllerRef->GetPawn())
-	{
-		return EBTNodeResult::Failed;
-	}
-	AFlyingAICharacter* PawnRef = Cast<AFlyingAICharacter>(ControllerRef->GetPawn());
-	if (PawnRef)
+	if (AFlyingAICharacter* PawnRef = Cast<AFlyingAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		PawnRef->Shoot();
+		return EBTNodeResult::Succeeded;
 	}
-	return EBTNodeResult::Succeeded;
+	UE_LOG(LogTemp, Warning, TEXT("Le owner du task ShootOnPlayer n'est pas a child de AFlyingAICharacter."));
+	return EBTNodeResult::Failed;
 }
