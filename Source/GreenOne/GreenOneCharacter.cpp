@@ -9,6 +9,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGreenOneCharacter
@@ -127,6 +129,21 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
 float AGreenOneCharacter::GetHealthPercent()
 {
 	return Health/MaxHealth;
+}
+
+void AGreenOneCharacter::Shoot()
+{
+	APlayerCameraManager* CameraRef = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	FHitResult OutHit;
+	GetWorld()->LineTraceSingleByChannel(OutHit, CameraRef->GetCameraLocation(), CameraRef->GetCameraLocation() + CameraRef->GetActorForwardVector()* 5000.f, ECC_WorldDynamic);
+	if (OutHit.GetActor())
+	{
+		if (OutHit.GetActor()->Implements<UEntityGame>())
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *OutHit.GetActor()->GetFName().ToString());
+			IEntityGame::Execute_EntityTakeDamage(OutHit.GetActor(), DamagePlayer);
+		}
+	}
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)

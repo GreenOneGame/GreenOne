@@ -50,7 +50,7 @@ void AFlyingAICharacter::TimerShoot()
 		// Check si l'actor hit est vide ou pas.
 		if (!Outhit.GetActor())
 		{
-			UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
+			//UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
 			return;
 		}
 		else if (Outhit.GetActor()->Implements<UEntityGame>())

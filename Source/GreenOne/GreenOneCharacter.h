@@ -62,6 +62,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnTakeDamage OnTakeDamage;
 
+	UFUNCTION(BlueprintCallable)
+	void Shoot();
+
+	UPROPERTY(EditAnywhere)
+	float DamagePlayer = 10.f;
+
 protected:
 
 	void Move(const FInputActionValue& Value);

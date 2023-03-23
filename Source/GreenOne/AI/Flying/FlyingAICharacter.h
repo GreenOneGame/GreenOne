@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GreenOne/AI/BaseEnnemy.h"
 #include "FlyingAICharacter.generated.h"
 
 UCLASS()
-class GREENONE_API AFlyingAICharacter : public ACharacter
+class GREENONE_API AFlyingAICharacter : public ABaseEnnemy
 {
 	GENERATED_BODY()
 
@@ -37,9 +37,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|Data")
-	float Damage = 12.f;
 
 private:
 
