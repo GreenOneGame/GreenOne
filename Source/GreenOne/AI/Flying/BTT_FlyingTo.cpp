@@ -44,7 +44,11 @@ void UBTT_FlyingTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemor
 	}
 	if (ACharacter* AIRef = Cast<ACharacter>(ControllerRef->GetPawn()))
 	{
-		FVector LocTo = TargetLocation - ControllerRef->GetPawn()->GetActorLocation();
+		FVector LocTo = TargetLocation - ControllerRef->GetPawn()->GetActorLocation();	
+		if (Zlock)
+		{
+			LocTo.Z = 0.f;
+		}
 		LocTo.Normalize();
 		AIRef->GetMovementComponent()->AddInputVector(LocTo);
 	}

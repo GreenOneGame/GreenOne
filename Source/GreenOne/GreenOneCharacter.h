@@ -38,9 +38,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	/**
+	 * Give if the player is attacking or not.
+	 */
+	UFUNCTION(BlueprintCallable)
+	bool IsAttacking();
+
 protected:
 
 	void Move(const FInputActionValue& Value);
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsAtk;
 
 	/** 
 	 * Called via input to turn at a given rate. 

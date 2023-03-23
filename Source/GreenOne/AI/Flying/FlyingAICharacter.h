@@ -26,14 +26,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Custom")
+	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Custom")
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRate = 0.5f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Custom")
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
+	float ShootRange = 5000.f;
 
 private:
 

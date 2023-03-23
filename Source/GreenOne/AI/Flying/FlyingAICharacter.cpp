@@ -2,6 +2,7 @@
 
 
 #include "FlyingAICharacter.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -34,16 +35,23 @@ void AFlyingAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AFlyingAICharacter::Shoot()
 {
-	GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
+	//GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
 	TimerShoot();
 }
 
 void AFlyingAICharacter::TimerShoot()
 {
-	if (!ProjectileClass)
-	{
-		return;
-	}
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, GetActorLocation(), GetActorRotation());
+	FHitResult Outhit;
+	const TArray<AActor*> ActorToIgnore;
+	GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera);
+
+	//UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * ShootRange), TEXT("ECC_Camera"), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
+	//UE_LOG(LogTemp,Warning, TEXT("Touch : %s"), *Outhit.ToString());
+	//if (!ProjectileClass)
+	//{
+	//	return;
+	//}
+
+	//GetWorld()->SpawnActor<AActor>(ProjectileClass, GetActorLocation(), GetActorRotation());
 }
 

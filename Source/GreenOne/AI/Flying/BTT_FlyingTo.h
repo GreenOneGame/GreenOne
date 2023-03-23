@@ -27,6 +27,13 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "Target move to"))
 	FBlackboardKeySelector TargetRef;
+
+	/**
+	 * If true the AI would fly without moving in the z axis.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool Zlock = false;
+
 private:
 
 	AController* ControllerRef;

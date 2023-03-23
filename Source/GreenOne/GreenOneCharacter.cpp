@@ -111,6 +111,11 @@ void AGreenOneCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
+bool AGreenOneCharacter::IsAttacking()
+{
+	return IsAtk;
+}
+
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
