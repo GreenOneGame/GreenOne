@@ -44,11 +44,11 @@ void AFlyingAICharacter::TimerShoot()
 {
 	FHitResult Outhit;
 	const TArray<AActor*> ActorToIgnore;
+	// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe
+	// Bref magic number toi meme tu sais.
 	GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera);
-	UE_LOG(LogTemp, Warning, TEXT("Entity hit : %s"), *Outhit.GetActor()->GetFName().ToString());
 	if (Outhit.GetActor()->Implements<UEntityGame>())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Il possede bien le Interface"));
 		IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
 	}
 	
