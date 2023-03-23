@@ -43,13 +43,15 @@ void AFlyingAICharacter::Shoot()
 void AFlyingAICharacter::TimerShoot()
 {
 	FHitResult Outhit;
-	const TArray<AActor*> ActorToIgnore;
-	// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe
-	// Bref magic number toi meme tu sais.
-	GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera);
-	if (Outhit.GetActor()->Implements<UEntityGame>())
+	TArray<AActor*> ActorToIgnore;
+	ActorToIgnore.Add(this);
+	// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
+	if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera))
 	{
-		IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
+		if (Outhit.GetActor()->Implements<UEntityGame>())
+		{
+			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
+		}
 	}
 	
 

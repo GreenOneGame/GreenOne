@@ -120,8 +120,8 @@ bool AGreenOneCharacter::IsAttacking()
 void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
 {
 	Health -= damage;
+	if(Health <= 0) { Health = 0.f; }
 	OnTakeDamage.Broadcast();
-	UE_LOG(LogTemp, Warning, TEXT("DamagePlayer : %f"), damage);
 }
 
 float AGreenOneCharacter::GetHealthPercent()
