@@ -43,25 +43,21 @@ void AFlyingAICharacter::Shoot()
 void AFlyingAICharacter::TimerShoot()
 {
 	FHitResult Outhit;
-	TArray<AActor*> ActorToIgnore;
-	ActorToIgnore.Add(this);
+	
 	// TODO à changer ici parce que le raycast touche l'ia Volante et c'est pas bon puis changer aussi la distance de tire parce que la elle est fixe Bref magic number toi meme tu sais.
-	if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * ShootRange), ECC_Camera))
 	{
-		if (Outhit.GetActor()->Implements<UEntityGame>())
+		// Check si l'actor hit est vide ou pas.
+		if (!Outhit.GetActor())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Actor Nulle ne rien faire parce que sinon ça crash xD."));
+			return;
+		}
+		else if (Outhit.GetActor()->Implements<UEntityGame>())
 		{
 			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
 		}
+		//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 	}
-	
-
-	//UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * ShootRange), TEXT("ECC_Camera"), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
-	//UE_LOG(LogTemp,Warning, TEXT("Touch : %s"), *Outhit.ToString());
-	//if (!ProjectileClass)
-	//{
-	//	return;
-	//}
-
-	//GetWorld()->SpawnActor<AActor>(ProjectileClass, GetActorLocation(), GetActorRotation());
 }
 

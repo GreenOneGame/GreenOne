@@ -7,7 +7,16 @@
 
 EBTNodeResult::Type UBTT_ShootOnPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	AFlyingAICharacter* PawnRef = Cast<AFlyingAICharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	AAIController* ControllerRef = OwnerComp.GetAIOwner();
+	if (!ControllerRef)
+	{
+		return EBTNodeResult::Failed;
+	}
+	if (!ControllerRef->GetPawn())
+	{
+		return EBTNodeResult::Failed;
+	}
+	AFlyingAICharacter* PawnRef = Cast<AFlyingAICharacter>(ControllerRef->GetPawn());
 	if (PawnRef)
 	{
 		PawnRef->Shoot();
