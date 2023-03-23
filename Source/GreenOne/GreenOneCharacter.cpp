@@ -116,6 +116,11 @@ bool AGreenOneCharacter::IsAttacking()
 	return IsAtk;
 }
 
+void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DamagePlayer : %f"), damage);
+}
+
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D

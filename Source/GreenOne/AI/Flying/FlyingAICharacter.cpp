@@ -3,6 +3,7 @@
 
 #include "FlyingAICharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GreenOne/Gameplay/EntityGame.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -43,7 +44,14 @@ void AFlyingAICharacter::TimerShoot()
 {
 	FHitResult Outhit;
 	const TArray<AActor*> ActorToIgnore;
-	GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera);
+	GetWorld()->LineTraceSingleByChannel(Outhit, GetActorLocation() + GetActorForwardVector() * 50, GetActorLocation() + (GetActorForwardVector() * 50000), ECC_Camera);
+	UE_LOG(LogTemp, Warning, TEXT("Entity hit : %s"), *Outhit.GetActor()->GetFName().ToString());
+	if (Outhit.GetActor()->Implements<UEntityGame>())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Il possede bien le Interface"));
+		IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
+	}
+	
 
 	//UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * ShootRange), TEXT("ECC_Camera"), false, ActorToIgnore, EDrawDebugTrace::ForOneFrame, Outhit, true);
 	//UE_LOG(LogTemp,Warning, TEXT("Touch : %s"), *Outhit.ToString());

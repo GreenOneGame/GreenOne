@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
 
 UCLASS(config=Game)
-class AGreenOneCharacter : public ACharacter
+class AGreenOneCharacter : public ACharacter, public IEntityGame
 {
 	GENERATED_BODY()
 
@@ -43,6 +44,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	bool IsAttacking();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void EntityTakeDamage(float damage);
 
 protected:
 

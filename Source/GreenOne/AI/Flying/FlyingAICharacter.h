@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Data")
+	float Damage = 12.f;
+
 private:
 
 	void TimerShoot();
