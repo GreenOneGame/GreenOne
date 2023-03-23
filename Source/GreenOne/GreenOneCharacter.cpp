@@ -87,6 +87,7 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	MaxHealth = Health;
 }
 
 void AGreenOneCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -118,7 +119,14 @@ bool AGreenOneCharacter::IsAttacking()
 
 void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage)
 {
+	Health -= damage;
+	OnTakeDamage.Broadcast();
 	UE_LOG(LogTemp, Warning, TEXT("DamagePlayer : %f"), damage);
+}
+
+float AGreenOneCharacter::GetHealthPercent()
+{
+	return Health/MaxHealth;
 }
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)

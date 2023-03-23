@@ -15,6 +15,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -48,9 +50,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeDamage(float damage);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
+	float Health = 100.f;
+
+	/**
+	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetHealthPercent();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTakeDamage OnTakeDamage;
+
 protected:
 
 	void Move(const FInputActionValue& Value);
+
+	float MaxHealth = 0;
 
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
