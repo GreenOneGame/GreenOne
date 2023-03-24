@@ -11,7 +11,6 @@ ABaseEnnemy::ABaseEnnemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 	LifeBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LifeBar_DEBUG"));
 	LifeBarComponent->SetupAttachment(RootComponent);
 	LifeBarComponent->SetWidgetClass(LifeBarClass);
@@ -22,11 +21,20 @@ void ABaseEnnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	MaxHealth = Health;
-	if (UDebug_W_LifeBar* CurrenLifeBar = Cast<UDebug_W_LifeBar>(LifeBarComponent->GetWidget()))
+	if (DrawLifeBar)
 	{
-		CurrenLifeBar->SetOwner(this);
+		if (LifeBarComponent->GetWidget())
+		{
+			if (UDebug_W_LifeBar* CurrenLifeBar = Cast<UDebug_W_LifeBar>(LifeBarComponent->GetWidget()))
+			{
+				CurrenLifeBar->SetOwner(this);
+			}
+		}
 	}
-
+	else
+	{
+		LifeBarComponent->SetHiddenInGame(true);
+	}
 }
 
 float ABaseEnnemy::GetPercentHealth()

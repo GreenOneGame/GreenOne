@@ -24,7 +24,7 @@ void AFlyingAICharacter::BeginPlay()
 void AFlyingAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	TickCooldown(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -37,7 +37,28 @@ void AFlyingAICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void AFlyingAICharacter::Shoot()
 {
 	//GetWorld()->GetTimerManager().SetTimer(ShootTimer, this, &AFlyingAICharacter::TimerShoot, ShootRate, true);
-	TimerShoot();
+	if (!IsInCooldown)
+	{
+		TimerShoot();
+	}
+}
+
+void AFlyingAICharacter::ActiveCooldown()
+{
+	IsInCooldown = true;
+	TimeRemainingForShoot = 1/ShootRate;
+}
+
+void AFlyingAICharacter::TickCooldown(float DeltaSeconds)
+{
+	if (IsInCooldown)
+	{
+		TimeRemainingForShoot -= DeltaSeconds;
+		if (TimeRemainingForShoot <= 0.f)
+		{
+			IsInCooldown = false;
+		}
+	}
 }
 
 void AFlyingAICharacter::TimerShoot()
@@ -55,6 +76,7 @@ void AFlyingAICharacter::TimerShoot()
 		}
 		else if (Outhit.GetActor()->Implements<UEntityGame>())
 		{
+			ActiveCooldown();
 			IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage);
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());

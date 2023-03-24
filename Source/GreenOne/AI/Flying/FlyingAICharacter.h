@@ -29,7 +29,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
+	/**
+	 * Correspond au nombre de tire par seconde
+	 * 2 = 2 tire par seconde
+	 * 1 = 1 tire par seconde
+	 * 0.5 = 1 toutes les 2 secondes
+	 */
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0, UIMin = 0, UIMax = 5), Category = "Custom|Tire")
 	float ShootRate = 0.5f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
@@ -39,6 +45,14 @@ public:
 	float ShootRange = 5000.f;
 
 private:
+
+	void ActiveCooldown();
+
+	void TickCooldown(float DeltaSeconds);
+
+	bool IsInCooldown = false;
+
+	float TimeRemainingForShoot = 0;
 
 	void TimerShoot();
 

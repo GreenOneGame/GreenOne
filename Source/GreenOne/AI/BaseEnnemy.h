@@ -33,19 +33,28 @@ public:
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de vie de l'entity
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Health")
+	UFUNCTION(BlueprintCallable, Category = "Custom|Health")
 	float GetPercentHealth();
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Custom|Damage")
 	FOnTakeDamage OnTakeDamage;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
 	void EntityTakeDamage(float DamageApply);
 
-	UPROPERTY(EditAnywhere)
+protected:
+
+	/************************************************************************/
+	/* Draw Debug Life bar													*/
+	/************************************************************************/
+
+	UPROPERTY(EditAnywhere, Category = "Debug|Life")
 	class UWidgetComponent* LifeBarComponent;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere, Category = "Debug|Life")
+	bool DrawLifeBar = false;
+
+	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = DrawLifeBar), Category = "Debug|Life")
 	TSubclassOf<UUserWidget> LifeBarClass;
 
 private:
