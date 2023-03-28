@@ -1,0 +1,22 @@
+name: Package
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Debug Git
+        run: git log
+
+      - name: Run Package 
+        run: |
+          cd "U:\UE_5.1\Engine\Build\BatchFiles\"
+          .\RunUAT.bat BuildCookRun -project="U:\actions-runner\_work\GreenOne\GreenOne\GreenOne.uproject" -noP4 -platform=Win64 -clientconfig=Developement -serverconfig=Development -cook -allmaps -build -stage -pak -archive -archivedirectory="C:\Users\SERV-ADMIN\Desktop\GreenOneProject\Package\"
+        shell: pwsh
