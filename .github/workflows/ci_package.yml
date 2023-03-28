@@ -5,6 +5,11 @@ on:
     branches:
       - 'master'
 
+  # Debug 
+  push:
+    branches:
+      - 'feature-ci-integration'
+
 jobs:
   build:
     runs-on: self-hosted
