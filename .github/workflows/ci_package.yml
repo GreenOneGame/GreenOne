@@ -16,7 +16,7 @@ jobs:
         run: git log
 
       - name: Run Package 
+      - shell: powershell
         run: |
             cd "C:\Users\SERV-ADMIN\Desktop\GreenOneProject\"
             .\package_ue5.ps1
-        shell: pwsh
