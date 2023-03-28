@@ -22,5 +22,6 @@ jobs:
       - name: Run build CI
         run: |
           cd "U:\UE_5.1\Engine\Build\BatchFiles\" 
-          ./Build.bat GreenOneEditor Win64 Development -project="U:\actions-runner\_work\GreenOne\GreenOne\GreenOne.uproject" -WaitMutex -FromMsBuild
-        shell: pwsh
+          U:
+          Build.bat GreenOneEditor Win64 Development -project="U:\actions-runner\_work\GreenOne\GreenOne\GreenOne.uproject" -WaitMutex -FromMsBuild
+        shell: bash
