@@ -20,7 +20,7 @@ jobs:
         run: git log
 
       - name: Run build CI
-      - shell: powershell
+        shell: powershell
         run: |
             cd "C:\Users\SERV-ADMIN\Desktop\GreenOneProject\"
             .\build_ue5.ps1
