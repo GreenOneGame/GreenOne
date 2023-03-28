@@ -1,14 +1,11 @@
+# YML : Jobs Package on GreenOne Project
 name: Package
 
 on:
+  # Jobs run when 'pull_request' on 'master'
   pull_request:
     branches:
       - 'master'
-
-  # Debug 
-  push:
-    branches:
-      - 'feature-ci-integration'
 
 jobs:
   build:

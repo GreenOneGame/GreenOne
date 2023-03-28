@@ -1,11 +1,13 @@
+# YML : Jobs Builds on GreenOne Project
 name: Build
 
 on:
-  # push:
-    # branches:
-      # - 'feature-*'
+  push:
+    branches:
+      - 'feature-*'
   pull_request:
-    branches: ['dev', 'release', 'master']
+    branches:
+      - 'release'
 
   workflow_dispatch:
 
