@@ -210,7 +210,7 @@ float AGreenOneCharacter::GetHealthPercent()
 
 void AGreenOneCharacter::Shoot()
 {
-
+	TurnCamera();
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
@@ -368,6 +368,12 @@ void AGreenOneCharacter::TogglePauseGame()
 		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(ControllerRef, PauseWidgetRef);
 	}
 }
+
+void AGreenOneCharacter::TurnCamera()
+{
+	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
+}
+
 
 void AGreenOneCharacter::AttackMelee()
 {
