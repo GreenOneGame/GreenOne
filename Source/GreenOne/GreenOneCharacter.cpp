@@ -210,7 +210,7 @@ float AGreenOneCharacter::GetHealthPercent()
 
 void AGreenOneCharacter::Shoot()
 {
-
+	TurnCamera();
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
@@ -369,6 +369,10 @@ void AGreenOneCharacter::TogglePauseGame()
 	}
 }
 
+void AGreenOneCharacter::TurnCamera()
+{
+	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
+}
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
