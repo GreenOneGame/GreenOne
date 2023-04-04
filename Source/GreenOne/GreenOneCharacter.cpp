@@ -370,15 +370,6 @@ void AGreenOneCharacter::TogglePauseGame()
 }
 
 void AGreenOneCharacter::TurnCamera()
-<<<<<<< HEAD
-=======
-{
-	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
-}
-
-
-void AGreenOneCharacter::AttackMelee()
->>>>>>> feature-3C
 {
 	SetActorRotation(FRotator(GetActorRotation().Roll, GetFollowCamera()->GetComponentRotation().Yaw, GetActorRotation().Pitch));
 }
