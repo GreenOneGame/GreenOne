@@ -107,6 +107,7 @@ private:
 
 protected:
 
-	void DeadEntity();
+	virtual void DeadEntity();
+	void DestroyActor();
 
 };
