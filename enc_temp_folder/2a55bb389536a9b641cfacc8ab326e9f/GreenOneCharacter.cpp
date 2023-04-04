@@ -115,8 +115,13 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
+<<<<<<<< HEAD:enc_temp_folder/2a55bb389536a9b641cfacc8ab326e9f/GreenOneCharacter.cpp
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Ongoing, this, &AGreenOneCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Canceled, this, &AGreenOneCharacter::StopShoot);
+========
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
+>>>>>>>> d137b04 (First InputAction Clean):Source/GreenOne/GreenOneCharacter.cpp
 		EnhancedInputComponent->BindAction(AttackMeleeAction, ETriggerEvent::Triggered, AttackMeleeComponent, &UAttackMelee::Attack);
 		EnhancedInputComponent->BindAction(EnableFertilizerAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::EnableFertilizer);
 		EnhancedInputComponent->BindAction(ChangeFertilizerTypeAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::ChangeFertilizerType);
