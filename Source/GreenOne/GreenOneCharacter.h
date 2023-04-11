@@ -172,6 +172,21 @@ private:
 
 #pragma endregion
 
+#pragma region Mode
+
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void IsRegenerate();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
+	bool IsCombatMode = false;
+private:
+
+
+#pragma endregion 
+	
 private:
 
 	bool bIsDead = false;

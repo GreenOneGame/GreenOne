@@ -9,6 +9,7 @@
 #include "BrainComponent.h"
 #include "EnnemySpawner.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GreenOne/MeleeAICharacter.h"
 
 // Sets default values
 ABaseEnnemy::ABaseEnnemy()
@@ -92,6 +93,7 @@ void ABaseEnnemy::EntityTakeDamage_Implementation(float DamageApply, FName BoneN
 	{
 		Health = 0.f;
 		DeadEntity();
+		
 	}
 	OnTakeDamage.Broadcast(DamageApply);
 }

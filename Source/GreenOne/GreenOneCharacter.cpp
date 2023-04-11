@@ -29,6 +29,8 @@ TSubclassOf<UFertilizerBase> AGreenOneCharacter::GetCurrentEffect(FertilizerType
 	return *Effects.Find(Type);
 }
 
+
+
 AGreenOneCharacter::AGreenOneCharacter()
 {
 	// Set size for collision capsule
@@ -87,6 +89,7 @@ AGreenOneCharacter::AGreenOneCharacter()
 	DashCooldown = 3.f;
 	bDashOnCooldown = false;
 	bIsDashing = false;
+	
 }
 
 void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -152,6 +155,7 @@ void AGreenOneCharacter::BeginPlay()
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
+	
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
 	DashTick(DeltaSeconds);
@@ -220,6 +224,7 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
+	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
@@ -392,3 +397,14 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
 }
+
+
+void AGreenOneCharacter::IsRegenerate()
+{
+	if(IsCombatMode)
+	{
+		Health = Health + 10;
+	}
+	
+}
+
