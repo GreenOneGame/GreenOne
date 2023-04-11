@@ -254,6 +254,7 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
+	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
@@ -452,4 +453,14 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
 	}
+}
+
+
+void AGreenOneCharacter::IsRegenerate()
+{
+	if(IsCombatMode)
+	{
+		Health = Health + 10;
+	}
+
 }
