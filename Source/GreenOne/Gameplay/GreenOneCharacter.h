@@ -7,7 +7,7 @@
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
@@ -185,9 +185,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	FName SocketMuzzle;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
-	class UNiagaraSystem* ShootParticule;
-
 	/**
 	 * Give if the player is attacking or not.
 	 */
@@ -225,7 +222,7 @@ public:
 	float ShootBloom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
-	class UNiagaraSystem* ImpactParticules;
+	TSubclassOf<AActor> DotDecal;
 
 protected:
 
@@ -249,24 +246,6 @@ private:
 	//void DotImpact();
 
 #pragma endregion
-
-#pragma region Mode
-
-
-public:
-
-	UFUNCTION(BlueprintCallable)
-		void IsRegenerate();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
-		bool IsCombatMode = false;
-private:
-
-
-#pragma endregion 
-
-
-
 
 #pragma region Pause
 
@@ -309,6 +288,6 @@ private:
 	bool IsCurrentEffectExist(FertilizerType Type);
 
 #pragma endregion 
-	
+
 };
 
