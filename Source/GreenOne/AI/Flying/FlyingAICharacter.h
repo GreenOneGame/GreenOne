@@ -49,8 +49,22 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
-	
+
+	UFUNCTION(BlueprintCallable)
 	virtual void UpdateMaxSpeed(float Speed) override;
+	virtual void ResetEffect(const float DelayToReset) override;
+
+#pragma region AnimationRotation
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0), Category = "Animation")
+	float RotationSpeed = 5.f;
+
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	FVector2D GetRotationAxis() { return CurrentRotationInput; };
+
+	void SetRotationAxis(FVector2D TargetAxis);
+
+#pragma endregion
 
 #pragma region Explosion
 
@@ -88,5 +102,11 @@ private:
 	void TimerShoot();
 
 	FTimerHandle ShootTimer;
+
+	void TickRotation(float DeltaSeconds);
+	
+	FVector2D CurrentRotationInput;
+
+	FVector2D TargetRotationInput;
 
 };
