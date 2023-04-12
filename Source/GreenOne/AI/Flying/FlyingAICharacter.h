@@ -23,24 +23,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
-#endif
-
-#pragma region Property
-
-
-
-#pragma endregion
-
-#pragma region Tire
-
-public:
-
-	// Percentage de degats du tire en percentage en fonction de l'attaque de l'ennemie de base.
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Damage du Tire", ClampMin = 0, UIMin = 0, UIMax = 1), Category = "Custom|Tire")
-	float RatioDmgShoot = 1.f;
-
 	UFUNCTION(BlueprintCallable, Category = "Custom|Tire")
 	void Shoot();
 
@@ -56,22 +38,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0, UIMin = 0, UIMax = 5), Category = "Custom|Tire")
 	float ShootRate = 0.5f;
 
-	/**
-	 * Use the old fashon trace to shoot.
-	 */
-	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire|UseTrace")
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	bool bUseTrace = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	TSubclassOf<class AAIProjectil> ProjectileClass;
 
-	/**
-	 * Definit une distance de tire lorsqu'utilisation du trace.
-	 */
-	UPROPERTY(EditDefaultsOnly, meta = (EditCondition = bUseTrace), Category = "Custom|Tire|UseTrace")
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Tire")
 	float ShootRange = 5000.f;
-
-#pragma endregion
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateMaxSpeed(float Speed) override;
@@ -79,10 +53,7 @@ public:
 
 #pragma region AnimationRotation
 
-	/**
-	 * Vitesse de rotation de l'animation des drones.
-	 */
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0), Category = "Custom|Animation")
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = 0), Category = "Animation")
 	float RotationSpeed = 5.f;
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
@@ -94,7 +65,7 @@ public:
 
 #pragma region Explosion
 
-	UFUNCTION(BlueprintCallable, Category = "Custom|Explosion")
+	UFUNCTION(BlueprintCallable)
 	void SelfDestruction();
 
 	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
@@ -107,25 +78,18 @@ public:
 	float ExploRadius;
 
 	/**
-	 * Percentage damage of the explosion
+	 * valeur de damage appliquer au player si in range.
+	 * Default one 20% of the player max health.
 	 */
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0, UIMin = 0, UIMax = 1), Category = "Custom|Explosion")
-	float RatioExploDmg = 1.8f;
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
+	float ExploDmg;
 
 #pragma endregion 
 
 private:
 
-#pragma region Tire
-
-	float ShootDmg;
-
-	float ExploDmg;
-
-	// Activate the cooldown of the shoot.
 	void ActiveCooldown();
 
-	// Function use to count the cooldown.
 	void TickCooldown(float DeltaSeconds);
 
 	bool IsInCooldown = false;
@@ -135,8 +99,6 @@ private:
 	void TimerShoot();
 
 	FTimerHandle ShootTimer;
-
-#pragma endregion
 
 	void TickRotation(float DeltaSeconds);
 	

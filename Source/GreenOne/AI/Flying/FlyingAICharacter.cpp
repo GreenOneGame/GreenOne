@@ -19,8 +19,7 @@ AFlyingAICharacter::AFlyingAICharacter()
 
 	ExploRadius = 100.f;
 
-	ExploDmg = Damage * RatioExploDmg;
-	ShootDmg = Damage * RatioDmgShoot;
+	ExploDmg = 20.f;
 
 }
 
@@ -41,20 +40,6 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
 }
-
-#if WITH_EDITOR
-void AFlyingAICharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioExploDmg))
-	{
-		ExploDmg = Damage * RatioExploDmg;
-	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioDmgShoot))
-	{
-		ShootDmg = Damage * RatioDmgShoot;
-	}
-}
-#endif
 
 void AFlyingAICharacter::Shoot()
 {
@@ -118,9 +103,6 @@ void AFlyingAICharacter::SelfDestruction()
 			}
 		}
 	}
-#if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, true, 5.f);
-#endif
 	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)
 	{
@@ -176,7 +158,7 @@ void AFlyingAICharacter::TimerShoot()
 				{
 					//If so, activate the cooldown and execute the EntityTakeDamage function
 					ActiveCooldown();
-					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), ShootDmg, Outhit.BoneName, this);
+					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 			}
@@ -195,7 +177,7 @@ void AFlyingAICharacter::TimerShoot()
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 		if (CurrentBullet)
 		{
-			CurrentBullet->ProjectilDamage = ShootDmg;
+			CurrentBullet->ProjectilDamage = Damage;
 		}
 	}
 }
