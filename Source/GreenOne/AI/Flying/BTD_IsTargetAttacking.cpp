@@ -2,7 +2,7 @@
 
 
 #include "BTD_IsTargetAttacking.h"
-#include "GreenOne/Gameplay/GreenOneCharacter.h"
+#include "GreenOne/GreenOneCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTD_IsTargetAttacking::UBTD_IsTargetAttacking()

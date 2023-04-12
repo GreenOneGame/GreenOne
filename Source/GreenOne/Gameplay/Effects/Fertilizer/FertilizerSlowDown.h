@@ -14,7 +14,7 @@ class GREENONE_API UFertilizerSlowDown : public UFertilizerBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Transient, Category = "Effect", DisplayName = "Max de ralentissement", meta = (ClampMin = 0, ClampMax = 100, ForceUnits = "%"))
+	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "Max de ralentissement", meta = (ClampMin = 0, ClampMax = 100, ForceUnits = "%"))
 	int32 MaxPercentSlownDown = 50;
 
 	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "% de ralentissement", meta = (ForceUnits = "%"))
@@ -29,7 +29,7 @@ public:
 	/**
 	 * Applique l'effet sur l'acteur
 	 */
-	virtual void ApplyEffect(AActor* Actor, AActor* Source) override;
+	virtual void ApplyEffect(AActor* Actor) override;
 
 	/**
 	 * Retourne le total de pourcentage affecté à l'acteur 
