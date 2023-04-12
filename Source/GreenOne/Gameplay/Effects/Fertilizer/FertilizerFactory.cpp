@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FertilizerFactory.h"
+#include "FertilizerEffectFactory.h"
 
 #include "FertilizerOther.h"
-#include "FertilizerAttackBonus.h"
 
 FertilizerFactory::FertilizerFactory()
 {
@@ -23,13 +22,10 @@ UFertilizerBase* FertilizerFactory::Factory(FertilizerType Type, TSubclassOf<UFe
 	switch (Type)
 	{
 	case FertilizerType::SlowDown:
-		Fertilizer = InitFertilizer<UFertilizerSlowDown>(FertilizerBase);
-		break;
-	case FertilizerType::AttackBonus:
-		Fertilizer = InitFertilizer<UFertilizerBase>(FertilizerBase);
+		Fertilizer = NewObject<UFertilizerSlowDown>(FertilizerBase);
 		break;
 	case FertilizerType::Other:
-		Fertilizer = InitFertilizer<UFertilizerOther>(FertilizerBase);
+		Fertilizer = NewObject<UFertilizerOther>(FertilizerBase);
 		default:
 			break;
 	}

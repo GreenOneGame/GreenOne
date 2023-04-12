@@ -18,9 +18,6 @@ public:
 	// Sets default values for this character's properties
 	ABaseEnnemy();
 
-	UPROPERTY(EditDefaultsOnly)
-	class UAC_DisplayDamage* DamageComp;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -36,8 +33,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Speed Max", meta = (ForceUnits = "cm/s"));
 	float MaxSpeed = 600.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Property", DisplayName = "Number of Hit");
-	float NumberOfHit = 0.f;
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de vie de l'entity
 	 */
@@ -51,10 +46,8 @@ public:
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
-	UFUNCTION(BlueprintCallable)
-	virtual void ResetEffect(float DelayToReset){};
-	
+	void EnityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
+
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
 
@@ -101,8 +94,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
 	TArray<UMaterialInterface*> MatTreshold;
 
-	FTimerHandle TimeToResetEffect;
-
 private:
 
 	float MaxHealth = 0;
@@ -111,7 +102,6 @@ private:
 
 protected:
 
-	virtual void DeadEntity();
-	void DestroyActor();
+	void DeadEntity();
 
 };

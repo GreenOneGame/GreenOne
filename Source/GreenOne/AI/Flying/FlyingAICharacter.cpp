@@ -4,12 +4,11 @@
 #include "FlyingAICharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/EntityGame.h"
-#include "GreenOne/Gameplay/GreenOneCharacter.h"	
+#include "GreenOne/GreenOneCharacter.h"	
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AFlyingAICharacter::AFlyingAICharacter()
@@ -38,7 +37,6 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TickCooldown(DeltaTime);
-	TickRotation(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -59,24 +57,10 @@ void AFlyingAICharacter::Shoot()
 
 void AFlyingAICharacter::UpdateMaxSpeed(float NewSpeed)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Update Speed"));
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxFlySpeed = NewSpeed;
 	}
-}
-
-void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
-{
-	TargetRotationInput = TargetAxis;
-}
-
-void AFlyingAICharacter::ResetEffect(float DelayToReset)
-{
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
-	{
-		UpdateMaxSpeed(MaxSpeed);
-	},DelayToReset,false);
 }
 
 //This function is used to perform self-destruction of the AI character.
@@ -182,15 +166,7 @@ void AFlyingAICharacter::TimerShoot()
 		FActorSpawnParameters SpawnParam;
 		SpawnParam.Owner = this;
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
-		if (CurrentBullet)
-		{
-			CurrentBullet->ProjectilDamage = Damage;
-		}
+		CurrentBullet->ProjectilDamage = Damage;
 	}
-}
-
-void AFlyingAICharacter::TickRotation(float DeltaSeconds)
-{
-	CurrentRotationInput = UKismetMathLibrary::Vector2DInterpTo_Constant(CurrentRotationInput, TargetRotationInput, DeltaSeconds, RotationSpeed);
 }
 
