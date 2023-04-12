@@ -20,7 +20,6 @@
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
-#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovement.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -42,8 +41,7 @@ bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
 	return true;
 }
 
-AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+AGreenOneCharacter::AGreenOneCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -86,8 +84,7 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-	
-	// Add TargetMuzzle
+
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
 	
@@ -97,6 +94,13 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	ShootCooldown = 1.f / 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
+
+	DashDistance = 100.f;
+	DashTime = 0.5f;
+	DashCooldown = 3.f;
+	bDashOnCooldown = false;
+	bIsDashing = false;
+	
 }
 
 #if WITH_EDITOR
@@ -121,7 +125,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::Dash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
@@ -141,12 +145,6 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
-}
-
-void AGreenOneCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 void AGreenOneCharacter::PlayerDead()
@@ -177,9 +175,11 @@ void AGreenOneCharacter::BeginPlay()
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
-	
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
+	DashTick(DeltaSeconds);
+	CooldownDash(DeltaSeconds);
+	Regenerate(DeltaSeconds);
 }
 
 void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
@@ -246,6 +246,8 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 	if(Immortal) return;
 	
 	Health -= damage;
+	UE_LOG(LogTemp, Warning, TEXT("loose life"));
+	IsCombatMode = true;
 	if (Health <= 0)
 	if(!Invisible) Health -= damage;
 	if(Health <= 0)
@@ -253,6 +255,7 @@ void AGreenOneCharacter::EntityTakeDamage_Implementation(float damage, FName Bon
 		PlayerDead();
 		Health = 0.f;
 	}
+	CanRegenerate();
 	OnTakeDamage.Broadcast();
 }
 
@@ -273,9 +276,10 @@ void AGreenOneCharacter::Shoot()
 
 void AGreenOneCharacter::StopShoot()
 {
-	IsRegenerate();
 	if (ShootHandler.IsValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("stop"));
+		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
 }
@@ -309,6 +313,8 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
 				IEntityGame::Execute_EntityTakeDamage(CurrentTargetHit, DamagePlayer, OutHit.BoneName, this);
@@ -363,6 +369,45 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
 			}
 		}
+	}
+}
+
+void AGreenOneCharacter::Dash()
+{
+	if (GetCharacterMovement()->IsFalling()) { return; }
+	if (bDashOnCooldown || bIsDashing) { return; }
+	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+	StartDashLocation = GetActorLocation();
+	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
+	CurrentDashAlpha = 0.f;
+	bIsDashing = true;
+}
+
+void AGreenOneCharacter::DashTick(float deltatime)
+{
+	if (!bIsDashing || bDashOnCooldown) { return; }
+
+	CurrentDashAlpha += (1 / DashTime) * deltatime;
+	if (CurrentDashAlpha >= 1)
+	{
+		CurrentDashAlpha = 1;
+		CurrentDashCooldown = DashCooldown;
+		bIsDashing = false;
+		bDashOnCooldown = true;
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
+	SetActorLocation(TargetLocation);
+	return;
+}
+
+void AGreenOneCharacter::CooldownDash(float deltatime)
+{
+	if (!bDashOnCooldown) { return; }
+	CurrentDashCooldown -= deltatime;
+	if (CurrentDashCooldown <= 0.f)
+	{
+		bDashOnCooldown = false;
 	}
 }
 
@@ -455,12 +500,51 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 }
 
 
-void AGreenOneCharacter::IsRegenerate()
+
+
+void AGreenOneCharacter::CanRegenerate()
 {
-	if(IsCombatMode)
+	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+
+	if(Health >= MaxHealth)
+		return;
+		
+	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
-		Health = Health + 10;
+		IsCombatMode = false;
+		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+	},CoolDown, false);
+	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+1 time"));
+		CoolDown++;
+		IsRegenerate();
 	}
-	
+	CanEarnHp = true;
+	IsRegenerate();*/
 }
 
+//void AGreenOneCharacter::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+/*{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	CanRegenerate(DeltaTime);
+}*/
+
+
+void AGreenOneCharacter::Regenerate(float DeltaSeconds)
+{
+	if(IsCombatMode) return;
+	
+	if(Health < MaxHealth)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		Health += 10*DeltaSeconds;
+		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		if(Health >= MaxHealth)
+		{
+			Health = MaxHealth;
+		}
+		OnRegen.Broadcast();
+	}
+}

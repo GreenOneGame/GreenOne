@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
-#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerEffectFactory.h"
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 #include "GreenOneCharacter.generated.h"
 
 class UInputAction;
@@ -17,6 +18,8 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeDamage);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRegen);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
@@ -62,17 +65,10 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 
 	UPROPERTY(EditAnywhere)
 	class UAttackMelee* AttackMeleeComponent;
-
-protected:
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
-	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
-
-	virtual void PostInitializeComponents() override;
 	
 public:
 
-	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
+	AGreenOneCharacter();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
@@ -119,7 +115,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	float MaxHealth = 0;
+	UPROPERTY(EditAnywhere, Category = "Health");
+	float MaxHealth = 100;
 
 	/** 
 	 * Called via input to turn at a given rate. 
@@ -171,10 +168,6 @@ private:
 
 public:
 
-	/** Returns CustomCharacterMovementComponent subobject **/
-	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
-	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
-	
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -192,6 +185,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	FName SocketMuzzle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
+	class UNiagaraSystem* ShootParticule;
 
 	/**
 	 * Give if the player is attacking or not.
@@ -230,7 +226,7 @@ public:
 	float ShootBloom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Decal dot ref d'impact"), Category = "Custom|Combat")
-	TSubclassOf<AActor> DotDecal;
+	class UNiagaraSystem* ImpactParticules;
 
 protected:
 
@@ -252,6 +248,85 @@ private:
 	void ShootTick(float deltatime);
 
 	//void DotImpact();
+
+#pragma endregion
+
+#pragma region Mode
+public:
+
+	// Called every frame
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	
+	UFUNCTION(BlueprintCallable)
+	void CanRegenerate();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
+	bool IsCombatMode = false;
+	
+
+	UFUNCTION(BlueprintCallable)
+	void Regenerate(float DeltaSeconds);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRegen OnRegen;
+	
+private:
+	FTimerHandle TimerRegen;
+	
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
+	float CoolDown = 5.f;
+#pragma endregion 
+
+#pragma region Dash
+
+public:
+
+	// Dash dans la direction de l'input mouvement.
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+	void Dash();
+
+	// Distance du dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
+	float DashDistance;
+
+	// Le temps que va prendre le dash pour attendre ça destination.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
+	float DashTime;
+
+	// Temps que va prendre le dash à revenir après utilisation.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
+	float DashCooldown;
+
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+	bool bIsDashing;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
+	bool bDashOnCooldown;
+
+	/**
+	 * Return the remaining time of the dash cooldown.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
+	float GetRemainingDashTime() { return CurrentDashCooldown; };
+
+private:
+
+	// Utiliser pour placer le player pendant le Dash
+	void DashTick(float deltatime);
+
+	void CooldownDash(float deltatime);
+
+	FVector TargetDashLocation;
+
+	FVector StartDashLocation;
+
+	float CurrentDashAlpha;
+
+	float CurrentDashCooldown;
 
 #pragma endregion
 
@@ -296,6 +371,6 @@ private:
 	bool IsCurrentEffectExist(FertilizerType Type);
 
 #pragma endregion 
-
+	
 };
 
