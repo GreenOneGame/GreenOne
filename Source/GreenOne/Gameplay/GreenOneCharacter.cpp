@@ -19,6 +19,7 @@
 #include "Components/SceneComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "GreenOne/Core/CustomCharacterMovementComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
 #include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
@@ -58,6 +59,7 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
+
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
@@ -104,6 +106,12 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	MaxHealth = Health;
 	ShootCooldownRemaining = 1.f / ShootCooldown;
 	
+}
+
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 #if WITH_EDITOR
@@ -209,6 +217,7 @@ void AGreenOneCharacter::InputJump(const FInputActionValue& Value)
 	bool bIsJumping = Value.Get<bool>();
 	if (bIsJumping)
 	{
+		
 		if(JumpMaxCount == 2)
 			DoubleJump();
 		else
