@@ -357,7 +357,31 @@ private:
 
 #pragma endregion 
 
-#pragma region Test
+#pragma region HorizontalJump
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", DisplayName = "Editer la rapidité du jump horizontal")
+	bool bManualHorizontalVelocity = false;
+	/** Default value of horizontal jump is the same that jump velocity */
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s", EditCondition="bManualHorizontalVelocity"), DisplayName = "Rapidité du jump horizontal")
+	float HorizontalJumpVelocity = 450.f;
+	bool bHorizontalJump;
+	
+	UPROPERTY(EditAnywhere, Category = "Custom|Jump|Horizontal", meta = (ForceUnits = "cm/s"), DisplayName = "Distance du jump horizontal")
+	float MaxDistanceHorizontalJump = 450.f;
+	float DistanceHorizontalJump;
+	FVector TargetHorizontalJump = FVector::ZeroVector;
+
+	FVector2D HorizontalJumpDirection = FVector2D::ZeroVector;
+	float TargetDistance = 0;
+
+	FVector CurrentLocation;
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Jump|Horizontal", DisplayName = "Double Jump")
+	void DoubleJump();
+	void HorizontalJump();
+
+#pragma endregion 
+	
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Test")
