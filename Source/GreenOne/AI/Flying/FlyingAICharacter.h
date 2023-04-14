@@ -71,6 +71,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
 	class UNiagaraSystem* ExplosionParticule;
 
+	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
+	class UNiagaraSystem* WarningExplosion;
+
+	UPROPERTY(EditAnywhere, meta = (UIMin = 0, UIMax = 1, ClampMin = 0, ClampMax = 1), Category = "Custom|Explosion|VFX")
+	float ExploTreshold;
+
 	/**
 	 * Radius de l'explosion.
 	 */
@@ -83,6 +89,13 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
 	float ExploDmg;
+
+	void SpawnWarning();
+
+private:
+
+	UFUNCTION()
+	void OnShinderu(float NbrDamage);
 
 #pragma endregion 
 

@@ -8,6 +8,7 @@
 #include "Engine/CollisionProfile.h"
 #include "AIProjectil.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -19,8 +20,8 @@ AFlyingAICharacter::AFlyingAICharacter()
 
 	ExploRadius = 100.f;
 
-	ExploDmg = 20.f;
-
+	ExploDmg = Damage * RatioExploDmg;
+	ShootDmg = Damage * RatioDmgShoot;
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +32,10 @@ void AFlyingAICharacter::BeginPlay()
 	{
 		GetCharacterMovement()->MaxFlySpeed = MaxSpeed;
 	}
+	this->OnTakeDamage.AddDynamic(this, &AFlyingAICharacter::OnShinderu);
+
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 2000);
 }
 
 // Called every frame
@@ -40,6 +45,20 @@ void AFlyingAICharacter::Tick(float DeltaTime)
 	TickCooldown(DeltaTime);
 	TickRotation(DeltaTime);
 }
+
+#if WITH_EDITOR
+void AFlyingAICharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioExploDmg))
+	{
+		ExploDmg = Damage * RatioExploDmg;
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AFlyingAICharacter, RatioDmgShoot))
+	{
+		ShootDmg = Damage * RatioDmgShoot;
+	}
+}
+#endif
 
 void AFlyingAICharacter::Shoot()
 {
@@ -66,10 +85,10 @@ void AFlyingAICharacter::SetRotationAxis(FVector2D TargetAxis)
 
 void AFlyingAICharacter::ResetEffect(float DelayToReset)
 {
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect,[&]()
-	{
-		UpdateMaxSpeed(MaxSpeed);
-	},DelayToReset,false);
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [&]()
+		{
+			UpdateMaxSpeed(MaxSpeed);
+		}, DelayToReset, false);
 }
 
 //This function is used to perform self-destruction of the AI character.
@@ -103,14 +122,37 @@ void AFlyingAICharacter::SelfDestruction()
 			}
 		}
 	}
+#if WITH_EDITOR
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, true, 5.f);
+#endif
 	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)
 	{
 		//Spawn the ExplosionParticule at the actor's location
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		UNiagaraComponent* CurrentExploParticule = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionParticule, GetActorLocation());
+		CurrentExploParticule->SetVariableFloat("ExplosionRadius", ExploRadius);
 	}
 	//Call the DeadEntity function
 	DeadEntity();
+}
+
+void AFlyingAICharacter::OnShinderu(float NbrDamage)
+{
+	if (GetPercentHealth() <= ExploTreshold)
+	{
+		SpawnWarning();
+	}
+}
+
+void AFlyingAICharacter::SpawnWarning()
+{
+	UMaterialInstanceDynamic* InstanceMat = GetMesh()->CreateDynamicMaterialInstance(0, GetMesh()->GetMaterial(0));
+	InstanceMat->SetScalarParameterValue(FName("EmissiveIntensity"), 200000);
+	if (WarningExplosion != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Warning!!"));
+		UNiagaraFunctionLibrary::SpawnSystemAttached(WarningExplosion, GetMesh(), FName("SocketShinderu"), FVector::ZeroVector, GetActorRotation(), FVector::OneVector, EAttachLocation::SnapToTarget, true, ENCPoolMethod::AutoRelease);
+	}
 }
 
 //This function sets the IsInCooldown boolean to true and sets the TimeRemainingForShoot to 1 divided by the ShootRate. 
@@ -158,7 +200,7 @@ void AFlyingAICharacter::TimerShoot()
 				{
 					//If so, activate the cooldown and execute the EntityTakeDamage function
 					ActiveCooldown();
-					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), Damage, Outhit.BoneName, this);
+					IEntityGame::Execute_EntityTakeDamage(Outhit.GetActor(), ShootDmg, Outhit.BoneName, this);
 				}
 				//UE_LOG(LogTemp, Warning, TEXT("Touch : %s"), *Outhit.GetActor()->GetFName().ToString());
 			}
@@ -177,7 +219,7 @@ void AFlyingAICharacter::TimerShoot()
 		AAIProjectil* CurrentBullet = GetWorld()->SpawnActor<AAIProjectil>(ProjectileClass, GetActorTransform(), SpawnParam);
 		if (CurrentBullet)
 		{
-			CurrentBullet->ProjectilDamage = Damage;
+			CurrentBullet->ProjectilDamage = ShootDmg;
 		}
 	}
 }
