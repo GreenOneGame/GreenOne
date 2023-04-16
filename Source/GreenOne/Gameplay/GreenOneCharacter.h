@@ -68,10 +68,17 @@ class AGreenOneCharacter : public ACharacter, public IEntityGame
 	
 	UFUNCTION(BlueprintCallable)
 	void SetLastTouchLocation(FVector Location);
+
+protected:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom|Mouvement")
+	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
+
+	virtual void PostInitializeComponents() override;
 	
 public:
 
-	AGreenOneCharacter();
+	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
@@ -178,6 +185,10 @@ private:
 
 public:
 
+	/** Returns CustomCharacterMovementComponent subobject **/
+	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
+	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
+	
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -275,80 +286,34 @@ public:
 	bool IsCombatMode = false;
 	
 
+#pragma endregion 
+
+#pragma region RegenerateHealth
+
+	float CoolDown = 5.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
+	/** Valeur d'incrémentation du cooldown après chaque attaque */
+	
+	FTimerHandle TimerRegen;
+
+private:
+	
+	FOnRegen OnRegen;
+
 	UFUNCTION(BlueprintCallable)
 	void Regenerate(float DeltaSeconds);
 
-	UPROPERTY(BlueprintAssignable)
-	FOnRegen OnRegen;
-	
-private:
-	FTimerHandle TimerRegen;
-	
-	/** Valeur d'incrémentation du cooldown après chaque attaque */
-	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
-	float CoolDown = 5.f;
 #pragma endregion 
-
-#pragma region Dash
-
-public:
-
-	// Dash dans la direction de l'input mouvement.
-	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
-	void Dash();
-
-	// Distance du dash
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ClampMin = 0), Category = "Custom|Dash")
-	float DashDistance;
-
-	// Le temps que va prendre le dash pour attendre ça destination.
-	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps du dash", ClampMin = 0), Category = "Custom|Dash")
-	float DashTime;
-
-	// Temps que va prendre le dash à revenir après utilisation.
-	// Le temps est en secondes.
-	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash"), Category = "Custom|Dash")
-	float DashCooldown;
-
-	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
-	bool bIsDashing;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
-	bool bDashOnCooldown;
-
-	/**
-	 * Return the remaining time of the dash cooldown.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
-	float GetRemainingDashTime() { return CurrentDashCooldown; };
-
-private:
-
-	// Utiliser pour placer le player pendant le Dash
-	void DashTick(float deltatime);
-
-	void CooldownDash(float deltatime);
-
-	FVector TargetDashLocation;
-
-	FVector StartDashLocation;
-
-	float CurrentDashAlpha;
-
-	float CurrentDashCooldown;
-
-#pragma endregion
 
 #pragma region Pause
 
 public:
 
-	UFUNCTION(BlueprintCallable)
-		void TogglePauseGame();
+	UFUNCTION(BlueprintCallable, Category = "Custom|Pause")
+	void TogglePauseGame();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Pause")
-		TSubclassOf<UUserWidget> PauseWidgetClass;
+	TSubclassOf<UUserWidget> PauseWidgetClass;
 
 private:
 
