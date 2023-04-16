@@ -8,7 +8,6 @@
 #include "GreenOne/Core/Audio/SG_AudioSettings.h"
 #include "Engine/LevelStreaming.h"
 
-
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
 	SaveClass = USG_GreenOne::StaticClass();
