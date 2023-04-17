@@ -574,6 +574,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	if(bHorizontalJump) return;
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
+
 	HorizontalJumpDirection = MovementVector;
 
 	if (Controller != nullptr)
