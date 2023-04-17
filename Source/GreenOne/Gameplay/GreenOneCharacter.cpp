@@ -21,6 +21,7 @@
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -42,7 +43,8 @@ bool AGreenOneCharacter::IsCurrentEffectExist(FertilizerType Type)
 	return true;
 }
 
-AGreenOneCharacter::AGreenOneCharacter()
+AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -85,7 +87,8 @@ AGreenOneCharacter::AGreenOneCharacter()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-
+	
+	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
 	
@@ -95,12 +98,6 @@ AGreenOneCharacter::AGreenOneCharacter()
 	ShootCooldown = 1.f / 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
-
-	DashDistance = 100.f;
-	DashTime = 0.5f;
-	DashCooldown = 3.f;
-	bDashOnCooldown = false;
-	bIsDashing = false;
 
 	JumpMaxCount = 2;
 	
@@ -128,7 +125,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
@@ -148,6 +145,12 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
+}
+
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 void AGreenOneCharacter::PlayerDead()
@@ -191,8 +194,7 @@ void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
-	DashTick(DeltaSeconds);
-	CooldownDash(DeltaSeconds);
+
 	Regenerate(DeltaSeconds);
 	HorizontalJump();
 }
@@ -397,50 +399,6 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
 			}
 		}
-	}
-}
-
-void AGreenOneCharacter::Dash()
-{
-	if(GetCharacterMovement()->IsFalling() && JumpCurrentCount > 0)
-	{
-		DoubleJump();
-	}
-	
-	if (GetCharacterMovement()->IsFalling()) { return; }
-	if (bDashOnCooldown || bIsDashing) { return; }
-	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
-	StartDashLocation = GetActorLocation();
-	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
-	CurrentDashAlpha = 0.f;
-	bIsDashing = true;
-}
-
-void AGreenOneCharacter::DashTick(float deltatime)
-{
-	if (!bIsDashing || bDashOnCooldown) { return; }
-
-	CurrentDashAlpha += (1 / DashTime) * deltatime;
-	if (CurrentDashAlpha >= 1)
-	{
-		CurrentDashAlpha = 1;
-		CurrentDashCooldown = DashCooldown;
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
-	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	SetActorLocation(TargetLocation);
-	return;
-}
-
-void AGreenOneCharacter::CooldownDash(float deltatime)
-{
-	if (!bDashOnCooldown) { return; }
-	CurrentDashCooldown -= deltatime;
-	if (CurrentDashCooldown <= 0.f)
-	{
-		bDashOnCooldown = false;
 	}
 }
 
