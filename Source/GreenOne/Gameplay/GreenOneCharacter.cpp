@@ -21,6 +21,7 @@
 #include "NiagaraComponent.h"
 
 #include "GreenOne/Gameplay/Common/AttackMelee.h"
+#include "GreenOne/Core/CustomCharacterMovement/CustomCharacterMovementComponent.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerBase.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerFactory.h"
 
@@ -88,24 +89,22 @@ AGreenOneCharacter::AGreenOneCharacter(const FObjectInitializer& ObjectInitializ
 	{
 		UE_LOG(LogTemp, Error, TEXT("No AttackMeleeComponent Found"));
 	}
-
+	
+	// Add TargetMuzzle
 	TargetMuzzle = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleTarget"));
 	TargetMuzzle->SetupAttachment(GetMesh());
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	ShootCooldown = 1.f / 3.f;
+	ShootCooldown = 3.f;
 	ShootBloom = 0.f;
 	CanShoot = true;
 
-	DashDistance = 100.f;
-	DashTime = 0.5f;
-	DashCooldown = 3.f;
-	bDashOnCooldown = false;
-	bIsDashing = false;
-
 	JumpMaxCount = 2;
+
+	MaxHealth = Health;
+	ShootCooldownRemaining = 1.f / ShootCooldown;
 	
 }
 
@@ -121,9 +120,13 @@ void AGreenOneCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	{
 		MaxHealth = Health;
 	}
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, SocketMuzzle))
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, ShootCooldown))
 	{
-		//TargetMuzzle->SetAttachSocketName(SocketMuzzle);
+		ShootCooldownRemaining = 1.f / ShootCooldown;
+	}
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AGreenOneCharacter, Health))
+	{
+		MaxHealth = Health;
 	}
 }
 #endif
@@ -136,7 +139,7 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Move);
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::Dash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, CustomCharacterMovementComponent, &UCustomCharacterMovementComponent::Dash);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGreenOneCharacter::InputJump);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AGreenOneCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AGreenOneCharacter::StopShoot);
@@ -156,6 +159,12 @@ void AGreenOneCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
+}
+
+void AGreenOneCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CustomCharacterMovementComponent = Cast<UCustomCharacterMovementComponent>(Super::GetCharacterMovement());
 }
 
 void AGreenOneCharacter::PlayerDead()
@@ -180,16 +189,24 @@ void AGreenOneCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	MaxHealth = Health;
-	ShootCooldownRemaining = ShootCooldown;
+}
+
+void AGreenOneCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	Respawn();
+}
+
+void AGreenOneCharacter::SetLastTouchLocation(FVector Location)
+{
+	LastTouchLocation = Location;
+	return;
 }
 
 void AGreenOneCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	ShootTick(DeltaSeconds);
-	DashTick(DeltaSeconds);
-	CooldownDash(DeltaSeconds);
+
 	Regenerate(DeltaSeconds);
 }
 
@@ -232,6 +249,16 @@ void AGreenOneCharacter::ChangeFertilizerType()
 void AGreenOneCharacter::Interact()
 {
 	// TODO
+}
+
+void AGreenOneCharacter::Respawn()
+{
+	SetActorLocation(LastTouchLocation);
+	if (this->Implements<UEntityGame>())
+	{
+		IEntityGame::Execute_EntityTakeDamage(this, MaxHealth*0.1f, FName("None"), this);
+	}
+	GetCharacterMovement()->StopMovementImmediately();
 }
 
 void AGreenOneCharacter::TurnAtRate(float Rate)
@@ -280,7 +307,7 @@ void AGreenOneCharacter::Shoot()
 	if (!CanShoot) { return; }
 
 	CanShoot = false;
-	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, ShootCooldown, true);
+	GetWorld()->GetTimerManager().SetTimer(ShootHandler, this, &AGreenOneCharacter::ShootRafale, 1/ShootCooldown, true);
 	ShootRafale();
 }
 
@@ -288,7 +315,6 @@ void AGreenOneCharacter::StopShoot()
 {
 	if (ShootHandler.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("stop"));
 		CanRegenerate();
 		GetWorld()->GetTimerManager().ClearTimer(ShootHandler);
 	}
@@ -323,7 +349,7 @@ void AGreenOneCharacter::ShootRafale()
 		}
 		if (ABaseEnnemy* CurrentTargetHit = Cast<ABaseEnnemy>(OutHit.GetActor()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
+			// UE_LOG(LogTemp, Warning, TEXT("shoot the ennemy"));
 			IsCombatMode = true;
 			if (CurrentTargetHit->Implements<UEntityGame>())
 			{
@@ -355,7 +381,7 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 		ShootCooldownRemaining -= deltatime;
 		if (ShootCooldownRemaining <= 0.f)
 		{
-			ShootCooldownRemaining = ShootCooldown;
+			ShootCooldownRemaining = 1/ShootCooldown;
 			CanShoot = true;
 		}
 	}
@@ -379,50 +405,6 @@ void AGreenOneCharacter::ShootTick(float deltatime)
 				LocationToAim = (OutHit.Location - TargetMuzzle->GetComponentLocation()) * ShootDistance;
 			}
 		}
-	}
-}
-
-void AGreenOneCharacter::Dash()
-{
-	if(GetCustomCharacterMovement()->IsFalling() && GetCustomCharacterMovement()->GetCurrentJumpState() == JS_Vertical)
-	{
-		Jump();
-	}
-	
-	if (GetCustomCharacterMovement()->IsFalling()) { return; }
-	if (bDashOnCooldown || bIsDashing) { return; }
-	GetCustomCharacterMovement()->SetMovementMode(MOVE_Custom);
-	StartDashLocation = GetActorLocation();
-	TargetDashLocation = StartDashLocation + GetActorForwardVector() * DashDistance;
-	CurrentDashAlpha = 0.f;
-	bIsDashing = true;
-}
-
-void AGreenOneCharacter::DashTick(float deltatime)
-{
-	if (!bIsDashing || bDashOnCooldown) { return; }
-
-	CurrentDashAlpha += (1 / DashTime) * deltatime;
-	if (CurrentDashAlpha >= 1)
-	{
-		CurrentDashAlpha = 1;
-		CurrentDashCooldown = DashCooldown;
-		bIsDashing = false;
-		bDashOnCooldown = true;
-		GetCustomCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
-	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
-	SetActorLocation(TargetLocation);
-	return;
-}
-
-void AGreenOneCharacter::CooldownDash(float deltatime)
-{
-	if (!bDashOnCooldown) { return; }
-	CurrentDashCooldown -= deltatime;
-	if (CurrentDashCooldown <= 0.f)
-	{
-		bDashOnCooldown = false;
 	}
 }
 
@@ -477,9 +459,9 @@ void AGreenOneCharacter::TurnCamera()
 
 void AGreenOneCharacter::Move(const FInputActionValue& Value)
 {
-
 	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
+	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
 	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
@@ -488,13 +470,13 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRotation = FRotator(0, Rotation.Yaw, 0);
 
 		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		// add movement 
 
@@ -515,12 +497,13 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVectorY);
 		AddMovementInput(RightDirection, MovementVectorX);
+
 	}
 }
 
 void AGreenOneCharacter::CanRegenerate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
+	// UE_LOG(LogTemp, Warning, TEXT("ptn de merde"));
 
 	if(Health >= MaxHealth)
 		return;
@@ -528,7 +511,7 @@ void AGreenOneCharacter::CanRegenerate()
 	GetWorld()->GetTimerManager().SetTimer(TimerRegen, [=]()
 	{
 		IsCombatMode = false;
-		UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
+		// UE_LOG(LogTemp, Warning, TEXT("ptn de merde 2"));
 	},CoolDown, false);
 	/*while(IsCombatMode == false && Health < 100 && CoolDown <= 5)
 	{
@@ -554,9 +537,9 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 	
 	if(Health < MaxHealth)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("+10 health"));
+		// UE_LOG(LogTemp, Warning, TEXT("+10 health"));
 		Health += 10*DeltaSeconds;
-		UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
+		// UE_LOG(LogTemp, Warning, TEXT("new health %f"), Health);
 		if(Health >= MaxHealth)
 		{
 			Health = MaxHealth;

@@ -26,6 +26,10 @@ void UCustomCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	ExecHorizontalJump();
 	ExecVerticalJump(DeltaTime);
+    
+    DashTick(DeltaTime);
+    CooldownTick(DeltaTime);    
+    
 }
 
 void UCustomCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
@@ -258,4 +262,105 @@ void UCustomCharacterMovementComponent::SetHorizontalJumpDirection(FVector2D& Ne
 {
 	HorizontalJumpDirection = NewDirection;
 }
+#pragma endregion
+
+#pragma region Dash
+
+void UCustomCharacterMovementComponent::Dash()
+{
+	// Securite
+	if (GC == nullptr) { return; }
+	if (GC->GetCharacterMovement()->IsFalling()) { return; }
+	if (bDashOnCooldown || bIsDashing) { return; }
+	// 
+
+	BeforeRotationCharacter = GC->GetActorRotation();
+	GC->GetCharacterMovement()->SetMovementMode(MOVE_Custom, CMOVE_DASH);
+	StartDashLocation = GC->GetActorLocation();
+
+	FVector DirectionVector = FVector::ZeroVector;
+
+	// Récupération de la direction du joueur
+	FVector Direction = GC->GetActorForwardVector().GetSafeNormal2D();
+	TempRotationCharacter = FRotator(0.f, Direction.Rotation().Yaw, 0.f);
+	
+	if ( DashDirectionVector != FVector2D::ZeroVector )
+	{
+		FVector Forward = GC->GetActorForwardVector().GetSafeNormal2D() * DashDirectionVector.Y;
+		FVector Right = GC->GetActorRightVector().GetSafeNormal2D() * DashDirectionVector.X;
+		Direction = Forward + Right;
+		Direction.Normalize();
+	}
+
+	float Yaw = ( Direction.Rotation().Yaw );
+	TempRotationCharacter = FRotator( 0.f, Yaw, 0.f);
+
+	Direction = FVector(Direction.X, Direction.Y, 0.f);
+
+	if (Direction == FVector::ZeroVector)
+	{
+		DirectionVector = GC->GetActorForwardVector();
+	}
+	else
+	{
+		DirectionVector = Direction;
+	}
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+
+	TargetDashLocation = StartDashLocation + DirectionVector * DashDistance;
+
+	// On verifie si le dash est en collision avec un objet
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartDashLocation, TargetDashLocation, ECC_Visibility, CollisionParams);
+
+	// Si le dash est en collision avec un objet, on reduit la distance du dash
+	if (bIsHit)
+	{
+		TargetDashLocation = StartDashLocation + (DirectionVector * (HitResult.Distance - 50.f));
+	}
+
+	// DashTime
+	DashTime = (DashDistance / DashSpeed) * 1000;
+	CurrentDashAlpha = 0.f;
+	bIsDashing = true;
+}
+
+void UCustomCharacterMovementComponent::DashTick(float DeltaTime)
+{
+	// Securite
+	if (!bIsDashing || bDashOnCooldown) { return; }
+	if (GreenOneCharacter == nullptr) { return; }
+	//
+
+	CurrentDashAlpha += (DeltaTime * 1000) / (DashTime);
+
+	if (CurrentDashAlpha >= 1)
+	{
+		CurrentDashAlpha = 1;
+		CurrentDashCooldown = DashCooldown;
+		bIsDashing = false;
+		bDashOnCooldown = true;
+		GC->SetActorRotation(BeforeRotationCharacter);
+		GC->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+
+	FVector TargetLocation = UKismetMathLibrary::VLerp(StartDashLocation, TargetDashLocation, CurrentDashAlpha);
+	GC->SetActorLocation(TargetLocation);
+	GC->SetActorRotation(TempRotationCharacter);
+}
+
+void UCustomCharacterMovementComponent::CooldownTick(float DeltaTime)
+{
+	if (!bDashOnCooldown) { return; }
+	CurrentDashCooldown -= DeltaTime;
+
+	if (CurrentDashCooldown <= 0.f)
+	{
+		CurrentDashCooldown = 0.f;
+		DashDirectionVector = FVector2D::ZeroVector;
+		bDashOnCooldown = false;
+	}
+}
+
 #pragma endregion

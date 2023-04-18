@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DEFINE.h"
+#include "MACRO.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CustomCharacterMovementComponent.generated.h"
@@ -12,6 +14,7 @@ enum ECustomMovementMode
 {
 	CMOVE_NONE	UMETA(Hidden),
 	//TODO: Add Custom movement mode
+    CMOVE_DASH UMETA(DisplayName = "Dash"),
 	CMOVE_MAX	UMETA(Hidden),
 };
 
@@ -30,21 +33,6 @@ UCLASS()
 class GREENONE_API UCustomCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
-
-	class FSavedMove_CustomCharacter : public FSavedMove_Character
-	{
-	public:
-		FSavedMove_CustomCharacter();
-
-		virtual bool CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* InCharacter, float MaxDelta) const override;
-		virtual void Clear() override;
-		virtual uint8 GetCompressedFlags() const override;
-		virtual void SetMoveFor(ACharacter* C, float InDeltaTime, FVector const& NewAccel, FNetworkPredictionData_Client_Character& ClientData) override;
-		virtual void PrepMoveFor(ACharacter* C) override;
-
-		//Walk Speed Update
-		uint8 bSavedRequestMaxWalkSpeedChange : 1;
-	};
 
 	UPROPERTY(Transient)
 	class AGreenOneCharacter* GreenOneCharacter;
@@ -137,4 +125,65 @@ public:
 	void SetHorizontalJumpDirection(FVector2D& NewDirection);
 
 #pragma endregion 
+
+#pragma region Dash
+public:
+
+	// Dash dans la direction de l'input mouvement.
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+		void Dash();
+
+	// Distance du dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
+		float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
+
+	// Vitesse du Dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
+		float DashSpeed = 2000.f; // CM/s
+
+	// Temps que va prendre le dash a revenir apres utilisation.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "s", ClampMin = 0), Category = "Custom|Dash")
+		float DashCooldown = 3.0f; // S
+
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+		bool bIsDashing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
+		bool bDashOnCooldown = false;
+
+	/**
+	 * Return the remaining time of the dash cooldown.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (Keywords = "Cooldown|Dash"), Category = "Dash")
+		float GetRemainingDashTime() { return CurrentDashCooldown; };
+
+	void SetDashDirectionVector(FVector2D& vector) { this->DashDirectionVector = vector; }
+
+private:
+
+	// Utiliser pour placer le player pendant le Dash
+	void DashTick(float DeltaTime);
+
+	// Cooldown du Dash
+	void CooldownTick(float DeltaTime);
+
+	FVector TargetDashLocation = FVector::ZeroVector;
+
+	FVector StartDashLocation = FVector::ZeroVector;
+
+	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
+
+	FRotator TempRotationCharacter = FRotator::ZeroRotator;
+
+	FVector2D DashDirectionVector = FVector2D::ZeroVector;
+
+	float CurrentDashAlpha = 0.f;
+
+	float CurrentDashCooldown = 0.f;
+
+	float DashTime = 0.f;
+
+#pragma endregion Dash
+
 };
