@@ -69,9 +69,6 @@ public:
 
 	AGreenOneCharacter(const FObjectInitializer& ObjectInitializer);
 
-	UFUNCTION(BlueprintCallable, Category = "Custom|Movement")
-	FORCEINLINE class UCustomCharacterMovementComponent* GetCustomCharacterMovement() const { return CustomCharacterMovementComponent; }
-
 	void InitializeCustomCharacterMovementComponent();
 
 #if WITH_EDITOR
@@ -146,8 +143,6 @@ protected:
 	virtual void BeginPlay();
 
 private:
-
-	class UCustomCharacterMovementComponent* CustomCharacterMovementComponent;
 
 	bool bIsDead = false;
 
