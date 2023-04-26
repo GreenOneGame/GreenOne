@@ -2,6 +2,8 @@
 
 #pragma once
 
+#define DASH 2
+
 #include "CoreMinimal.h"
 #include "DEFINE.h"
 #include "MACRO.h"
@@ -55,6 +57,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsCustomMovementMode(ECustomMovementMode InCustomMovementMode) const;
+
+private:
+	FRotator TempRotationCharacter = FRotator::ZeroRotator;
 	
 #pragma region Jump/Falling
 	//Attributes//
@@ -132,6 +137,7 @@ public:
 
 #pragma endregion 
 
+#if DASH == 1
 #pragma region Dash
 public:
 
@@ -182,9 +188,7 @@ private:
 	FVector StartDashLocation = FVector::ZeroVector;
 
 	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
-
-	FRotator TempRotationCharacter = FRotator::ZeroRotator;
-
+	
 	FVector2D DashDirectionVector = FVector2D::ZeroVector;
 
 	FVector TempTargetLocation = FVector::ZeroVector;
@@ -198,5 +202,136 @@ private:
 	class USoundBase* DashSound;
 
 #pragma endregion Dash
+#endif // DASH == 1
 
+#if DASH == 2
+#pragma region Dash V2
+
+	// METHODS
+public:
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+	void Dash();
+
+	UFUNCTION(BlueprintCallable, Category = "Custom|Dash")
+	void CancelDash();
+
+private:
+	
+	// Utiliser pour placer le player pendant le Dash
+	void DashTick(float DeltaTime);
+
+	// Cooldown du Dash
+	void CooldownTick(float DeltaTime);
+	
+	void SetupDashValues();
+
+	void ResetDashValues();
+
+	bool CanClimbUP(FHitResult &OldHitResult);
+
+	void AngleTrace(FHitResult &HitResult);
+
+	void CollisionTrace(FVector Begin, FVector End);
+
+	// ATTRIBUTS
+
+public:
+	// Distance du dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Distance du dash", ForceUnits = "cm", ClampMin = 0), Category = "Custom|Dash")
+	float DashDistance = 1000.f; // CM  => 100cm = 1m | 1000cm = 10m
+
+	// Vitesse du Dash
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Vitesse du dash", ForceUnits = "cm/s", ClampMin = 0), Category = "Custom|Dash")
+	float DashSpeed = 2000.f; // CM/s
+
+	// Temps que va prendre le dash a revenir apres utilisation.
+	// Le temps est en secondes.
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Temps de recharge du Dash", ForceUnits = "secs", ClampMin = 0), Category = "Custom|Dash")
+	float DashCooldown = 3.0f; // S
+
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "IsDashing"), Category = "Custom|Dash")
+	bool bIsDashing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Custom|Dash")
+	bool bDashOnCooldown = false;
+
+	
+private:
+
+	FVector TargetDashLocation = FVector::ZeroVector;
+
+	FVector StartDashLocation = FVector::ZeroVector;
+
+	FRotator BeforeRotationCharacter = FRotator::ZeroRotator;
+
+	FVector DashDirection = FVector::ZeroVector;
+	
+	FVector2D DashDirectionVector = FVector2D::ZeroVector;
+	
+	FVector TempTargetLocation = FVector::ZeroVector;
+	
+	float CurrentDashAlpha = 0.f;
+
+	float CurrentDashCooldown = 0.f;
+
+	float DashTime = 0.f;
+	
+	// *********************************************************************
+
+	//Classes to ignore when tracing
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<AActor>> ClassToSkip;
+
+	//Array of actors to ignore when tracing (added in runtime)
+	UPROPERTY()
+	TArray<AActor*> ToIgnore;
+	
+	//Array of points to dash to
+	TArray<FVector> DashPoints;
+
+	//Capsule component of the player
+	UPROPERTY()
+	UCapsuleComponent* Capsule;
+	
+	float InitialSpeedSize;
+
+	//After a trace, the distance left to dash
+	float DashDistanceLeft;
+
+	//The current point to dash to
+	int Iterator = 1;
+	
+	//The new supposed position of player to trace from	
+	FVector NewPausePoint;
+
+	//Duration of the dash
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"))
+	float DashDuration = 0.075f;
+
+	//When Dashing, the time elapsed since the dash started
+	float DashTimeElapsed = 0.f;
+	
+	//When not dashing, the time elapsed since the last dash
+	float DashCooldownElapsed = 0.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
+	float MaxVerticalAngle = 40.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
+	float MaxHorizontalAngle = 60.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash|Debug", meta = (AllowPrivateAccess = "true"))
+	bool DrawLines;
+	
+	//Security to avoid infinite loop
+	int MAXIT = 20;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom|Dash", meta = (AllowPrivateAccess = "true"))
+	float MaxClimbHeight = 30.f;
+	
+	// ADarkestCanopyCharacter* playerRef;
+	AGreenOneCharacter* playerRef;
+	
+#pragma endregion Dash V2
+#endif // DASH == 2
 };
