@@ -477,7 +477,7 @@ void AGreenOneCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	MovementVector = Value.Get<FVector2D>();
 	
-	GetCustomCharacterMovement()->SetDashDirectionVector(MovementVector);
+	GetCustomCharacterMovement()->SetDashDirectionVector2D(MovementVector);
 	GetCustomCharacterMovement()->SetHorizontalJumpDirection(MovementVector);
 
 	if(GetCustomCharacterMovement()->DoHorizontalJump()) return;
