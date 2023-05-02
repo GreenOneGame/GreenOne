@@ -13,23 +13,16 @@ struct FertilizerTankStruct
 	GENERATED_BODY()
 
 	FertilizerTankStruct();
-
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
-	FertilizerType Type;
 	
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
 	float MaxGaugeValue = 100.f;
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
-	float GaugeValue = 0.f;
+	float GaugeValue = MaxGaugeValue;
 	
-	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100))
 	float ReduceGaugeValue = 5.f;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UFertilizerBase> Effect;
-
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|UI")
-	FLinearColor ColorInfo;
 	
 	void UpdateGauge();
 	void AddFertilizer(float NewGaugeValue);
@@ -40,8 +33,9 @@ private:
 };
 
 //TODO: preparer les delegates pour les UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActionFertilizerSignature, int, index, float, GaugeValue, FLinearColor, ColorInfo);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActiveFertilizerSignature, bool, IsActive);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpdateFertilizerTankGaugeSignature, float, GaugeValueUpdate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquipFertilizerSignature, int, index, float, GaugeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSwitchFertilizerTypeSignature, int, index, float, GaugeValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GREENONE_API UFertilizerTankComponent : public UActorComponent
@@ -64,10 +58,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	TMap<FertilizerType,FertilizerTankStruct> FertilizerTanks;
 
-	// FertilizerTankStruct* FertilizerPrimary;
-	// FertilizerTankStruct* FertilizerSecondary;
-	FertilizerType FertilizerPrimaryType;
-	FertilizerType FertilizerSecondaryType;
+	FertilizerTankStruct* FertilizerPrimary;
+	FertilizerTankStruct* FertilizerSecondary;
 	
 	bool IsTypeExist(const FertilizerType Type) const;
 
@@ -83,12 +75,11 @@ private:
 	
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnActionFertilizerSignature OnActionFertilizerDelegate;
+	FOnUpdateFertilizerTankGaugeSignature OnUpdateFertilizerTankGaugeDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FOnActiveFertilizerSignature OnActiveFertilizerDelegate;
-
-	UPROPERTY(EditAnywhere)
-	bool bFertilizerActive = false;
+	FOnEquipFertilizerSignature OnEquipFertilizerDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnSwitchFertilizerTypeSignature OnSwitchFertilizerTypeDelegate;
 	
 	UFUNCTION(BlueprintCallable)
 	void OnShoot();
@@ -97,8 +88,6 @@ public:
 	bool IsTankEmpty(const FertilizerType Type);
 
 	void UpdateFertilizerType(FertilizerType Type);
-	UFUNCTION(BlueprintCallable)
-	void InitUIFertilizer();
 	void Equip();
 	void SwitchFertilizerEquip();
 
@@ -114,6 +103,6 @@ public:
 	FString GetFertilizerTypeName() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetFertilizerValueByType(FertilizerType Type, float Value);
-	void EventAction();
+	void SetFertilizerValue(float Value);
+	
 };
