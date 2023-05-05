@@ -49,7 +49,9 @@ void AFlyingAICharacter::BeginPlay()
 
 void AFlyingAICharacter::DeadEntity()
 {
-	AudioWarning->FadeOut(0.1f, 0.f, EAudioFaderCurve::Linear);
+	if(AudioWarning != nullptr)
+		AudioWarning->FadeOut(0.1f, 0.f, EAudioFaderCurve::Linear);
+
 	Super::DeadEntity();
 }
 
@@ -160,7 +162,7 @@ void AFlyingAICharacter::SelfDestruction()
 		}
 	}
 #if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, true, 5.f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExploRadius, 12, FColor::Red, false, 5.f);
 #endif
 	//Check if the ExplosionParticule is not null
 	if (ExplosionParticule != nullptr)
@@ -182,8 +184,11 @@ void AFlyingAICharacter::OnShinderu(float NbrDamage)
 	else if (GetPercentHealth() <= ExploTreshold)
 	{
 		IsAlreadyDead = true;
-		AudioWarning = UGameplayStatics::SpawnSoundAttached(SoundClass, RootComponent, FName(""), FVector::ZeroVector, EAttachLocation::SnapToTarget);
-		AudioWarning->FadeIn(1.f, 1.f, 0.f, EAudioFaderCurve::Linear);
+		//AudioWarning = UGameplayStatics::SpawnSoundAttached(SoundClass, RootComponent, FName(""), FVector::ZeroVector, EAttachLocation::SnapToTarget);
+		if (AudioWarning != nullptr)
+		{
+			AudioWarning->FadeIn(1.f, 1.f, 0.f, EAudioFaderCurve::Linear);
+		}
 
 		SpawnWarning();
 	}
