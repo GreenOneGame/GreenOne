@@ -84,8 +84,11 @@ private:
 #pragma region AnimationValue
 public:
 
+	void DodgeReset();
 	void StopMouv();	
-
+	void LEndCollision();
+	void REndCollision();
+	void SetRCollision();
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanDash() { return !IsDashing; };
 

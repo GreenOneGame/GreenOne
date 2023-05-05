@@ -3,6 +3,7 @@
 
 #include "MeleeAICharacter.h"
 #include "AIController.h"
+#include "BTT_AICombo.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"	
@@ -59,13 +60,26 @@ void AMeleeAICharacter::SetCollision()
 	{
 		L_ArmCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		L_ArmCollider->SetGenerateOverlapEvents(true);
+		UE_LOG(LogTemp, Warning, TEXT("Enable L_collision"));
 	}
 	if(R_ArmCollider)
 	{
 		R_ArmCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		R_ArmCollider->SetGenerateOverlapEvents(true);
+		UE_LOG(LogTemp, Warning, TEXT("Enable R_collision"));
 	}
 }
+
+void AMeleeAICharacter::SetRCollision()
+{
+	if(R_ArmCollider)
+	{
+		R_ArmCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		R_ArmCollider->SetGenerateOverlapEvents(true);
+		UE_LOG(LogTemp, Warning, TEXT("Enable R_collision"));
+	}
+}
+
 
 void AMeleeAICharacter::EndCollision()
 {
@@ -74,11 +88,46 @@ void AMeleeAICharacter::EndCollision()
 	{
 		L_ArmCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		L_ArmCollider->SetGenerateOverlapEvents(false);
+		UE_LOG(LogTemp, Warning, TEXT("Disable L_collision"));
 	}
 	if(R_ArmCollider)
 	{
 		R_ArmCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		R_ArmCollider->SetGenerateOverlapEvents(false);
+		UE_LOG(LogTemp, Warning, TEXT("Disable R_collision"));
+	}
+}
+
+void AMeleeAICharacter::LEndCollision()
+{
+	if(L_ArmCollider)
+	{
+		L_ArmCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		L_ArmCollider->SetGenerateOverlapEvents(false);
+		UE_LOG(LogTemp, Warning, TEXT("Disable Left collision"));
+	}
+}
+
+void AMeleeAICharacter::REndCollision()
+{
+	if(R_ArmCollider)
+	{
+		R_ArmCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		R_ArmCollider->SetGenerateOverlapEvents(false);
+		UE_LOG(LogTemp, Warning, TEXT("Disable Right collision"));
+	}
+}
+
+void AMeleeAICharacter::DodgeReset()
+{
+	if (AAIController* AIController = Cast<AAIController>(Controller))
+	{
+		UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+		if (BlackboardComp)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("StopMouv = false"));
+			BlackboardComp->SetValueAsBool("StopMouv", false);
+		}
 	}
 }
 
@@ -113,14 +162,14 @@ void AMeleeAICharacter::StopMouv()
 
 void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UnderTheFct"));
+	//UE_LOG(LogTemp, Warning, TEXT("UnderTheFct"));
 	if(CanCombo == true)
 	{
 		if(AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(OtherActor))
 		{
 			
 			UE_LOG(LogTemp, Warning, TEXT("2eme hit"));
-			UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, SweepResult.BoneName, this);
 			EndCollision();
 		}
@@ -128,7 +177,7 @@ void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* O
 	if(AGreenOneCharacter* CurrentPlayerRef = Cast<AGreenOneCharacter>(OtherActor))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("1eme hit"));
-		UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 		IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, SweepResult.BoneName, this);
 		EndCollision();
 		CanCombo = true;
