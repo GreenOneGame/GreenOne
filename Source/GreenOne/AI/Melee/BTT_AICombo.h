@@ -21,18 +21,8 @@ public:
 
 #pragma region Task
 	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
-
-	//void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds);
-
 	void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
 #pragma endregion	
-
-
-
-
-
-
-private:
 
 #pragma region Fight
 	int FightMStatus;
@@ -41,7 +31,6 @@ private:
 	void SetMoveFight(UBehaviorTreeComponent& OwnerComp);
 	void Check(UBehaviorTreeComponent& OwnerComp);
 	void HitCheck(UBehaviorTreeComponent& OwnerComp);
-	void Reset(UBehaviorTreeComponent& OwnerComp);
 #pragma endregion	
 
 

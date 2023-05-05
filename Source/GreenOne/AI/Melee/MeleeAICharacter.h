@@ -29,74 +29,48 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Distance de Detection devant l'ennemie ")
 	FVector Offset = FVector(0, 0, 0);
-	
-	//UFUNCTION(BlueprintCallable)
-	//void Collision();
 
-	UFUNCTION(BlueprintCallable)
-	void EndCollision();
 
+
+#pragma region ArmCollison
+public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCollision();
+	void SetRCollision();
+	void SetLCollision();
+	void EndCollision();
+	void LEndCollision();
+	void REndCollision();
+	
+private:
+	
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* R_ArmCollider;
+	
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* L_ArmCollider;
 
+	UFUNCTION()
+	void OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+#pragma endregion
 
 private:
 	
-	/** Radius de la zone de detection */
-	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Radius de la zone de détection")
-	float DetectionRadius = 80.f;
-
-
-	/** Offset de la detection selon la position du parent */
-	UPROPERTY(EditAnywhere, Category = "Fight|Melee|Detection", DisplayName = "Offset de la zone de détection")
-	FVector DetectionOffset;
-
-
-	// blabla
-	
-	//UFUNCTION(BlueprintCallable)
-	//void AttackMeleeOK();
-
-
-	// blabla
-	UPROPERTY(EditAnywhere, Category = "Custom|Explosion")
-	class UNiagaraSystem* ExplosionParticule;
-	
-	/**
-	 * Radius de l'explosion.
-	 */
-	//UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (DisplayName = "Radius d'explosion", ClampMin = 0), Category = "Custom|Explosion")
-	//float ExploRadius;
-
-	/**
-	 * valeur de damage appliquer au player si in range.
-	 * Default one 20% of the player max health.
-	 */
 	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Damage de l'explosion", ClampMin = 0), Category = "Custom|Explosion")
 	float ExploDmg;
 
-	//UFUNCTION()
-	//void OnDamage(float value);
-
-
 #pragma region AnimationValue
 public:
-
-	void DodgeReset();
+	
 	void StopMouv();	
-	void LEndCollision();
-	void REndCollision();
-	void SetRCollision();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanDash() { return !IsDashing; };
 
 	bool IsDashing = false;
 	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
-	//UAnimMontage* LeftDash;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanLDash = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
@@ -114,19 +88,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= Animations)
 	bool CanCombo = false;
-	
-
-	
-private:
-	
-	UFUNCTION()
-	void OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UPROPERTY(EditAnywhere)
-	class UBoxComponent* R_ArmCollider;
-	UPROPERTY(EditAnywhere)
-	UBoxComponent* L_ArmCollider;
-
 
 #pragma endregion	
 	
