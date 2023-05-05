@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GreenOne/AI/Melee/BTT_AICombo.h"
 #include "AIController.h"
 #include "Components/BoxComponent.h"
@@ -21,13 +20,11 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	FTimerHandle Timer;
 	GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
 	{
-		//OnTaskFinished(OwnerComp, NodeMemory, EBTNodeResult::Succeeded);
-		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 		{
+			//PlayerRef->EndCollision();
 			PlayerRef->CanM_Fighting = false;
 			PlayerRef->CanMR_Fighting = false;
-			PlayerRef->EndCollision();
 			HitCheck(OwnerComp);
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("timer"));
@@ -40,6 +37,7 @@ void UBTT_AICombo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("taskfinish"));
+		FightMStatus = 0;
 		FightStatus = 0;
 		PlayerRef->CanCombo = false;
 		PlayerRef->CanM_Fighting = false;
@@ -50,7 +48,6 @@ void UBTT_AICombo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 }
 
-
 void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 {
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
@@ -60,43 +57,34 @@ void UBTT_AICombo::SetMoveFight(UBehaviorTreeComponent& OwnerComp)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("mouv gauche"));
 			FightStatus = -1;
-			//PlayerRef->REndCollision();
 		}
 		else if(FightMStatus == 1)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("mouv droite"));
 			PlayerRef->CanMR_Fighting = true;
 			FightStatus = 1;
-			PlayerRef->LEndCollision();
 		}
 		Check(OwnerComp);
 	}
 }
-
 
 void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 {
 	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("setfight"));
-		PlayerRef->EndCollision();
 		PlayerRef->Can_Fighting = true;
 		if (FightStatus == -1)
 			{
-				
-				//PlayerRef->REndCollision();
-				//PlayerRef->REndCollision();
+				PlayerRef->SetRCollision();
 				PlayerRef->CanR_Fighting = true;
 				UE_LOG(LogTemp, Warning, TEXT("id_fightR"));
 				
 			}
 		if (FightStatus == 1)
 			{
-				PlayerRef->SetRCollision();
-				//PlayerRef->REndCollision();
-				//PlayerRef->REndCollision();
+				PlayerRef->SetLCollision();
 				UE_LOG(LogTemp, Warning, TEXT("id_fightL"));
-				
 			}
 		FTimerHandle Timer;
 		GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
@@ -106,7 +94,6 @@ void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 	}
 	
 }
-
 
 void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 {
@@ -121,7 +108,6 @@ void UBTT_AICombo::Check(UBehaviorTreeComponent& OwnerComp)
 			UE_LOG(LogTemp, Warning, TEXT("mouvR faux"));
 		}
 	}
-	
 }
 
 void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
@@ -139,20 +125,5 @@ void UBTT_AICombo::HitCheck(UBehaviorTreeComponent& OwnerComp)
 			UE_LOG(LogTemp, Warning, TEXT("cest la merde"))
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		};
-		//PlayerRef->DodgeReset();
-		
-	}
-}
-
-void UBTT_AICombo::Reset(UBehaviorTreeComponent& OwnerComp)
-{
-
-	if(AMeleeAICharacter* PlayerRef = Cast<AMeleeAICharacter>(OwnerComp.GetAIOwner()->GetPawn()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Reset Value Mouv"));
-		PlayerRef->CanM_Fighting = false;
-		PlayerRef->CanMR_Fighting = false;
-		PlayerRef->StopMouv();
-		HitCheck(OwnerComp);
 	}
 }
