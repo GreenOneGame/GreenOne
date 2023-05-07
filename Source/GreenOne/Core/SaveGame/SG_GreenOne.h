@@ -16,31 +16,33 @@ class GREENONE_API USG_GreenOne : public USaveGame
 
 public:
 
+	USG_GreenOne();
+
 	/**
 	 * Position du player sur la carte.
 	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
-	FVector PlayerLocation = FVector(-8976.f, -21785.f, 252.f);
+	FVector PlayerLocation;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
-	FRotator PlayerRotation = FRotator();
+	FRotator PlayerRotation;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|World")
-	FName MapName = FName("L_Level0");
+	FName MapName;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
-	float PlayerLife = 0;
+	float PlayerLife;
 
 	/**
 	 * Nombre de graine dans le chargeur du player.
 	 */
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Player")
-	int32 NbrSeed = 0;
+	int32 NbrSeed;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|World")
-	float SunLocation = 0.f;
+	float SunLocation;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Custom|Engine")
-	bool bIsFirstTime = true;
+	bool bIsFirstTime;
 	
 };
