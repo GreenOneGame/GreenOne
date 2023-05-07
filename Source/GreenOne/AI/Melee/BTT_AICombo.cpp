@@ -25,6 +25,8 @@ EBTNodeResult::Type UBTT_AICombo::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 			//PlayerRef->EndCollision();
 			PlayerRef->CanM_Fighting = false;
 			PlayerRef->CanMR_Fighting = false;
+			PlayerRef->Can_Fighting = false;
+			PlayerRef->CanR_Fighting = false;
 			HitCheck(OwnerComp);
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("timer"));
@@ -74,6 +76,7 @@ void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("setfight"));
 		PlayerRef->Can_Fighting = true;
+		FTimerHandle Timer;
 		if (FightStatus == -1)
 			{
 				PlayerRef->SetRCollision();
@@ -86,7 +89,6 @@ void UBTT_AICombo::SetFight(UBehaviorTreeComponent& OwnerComp)
 				PlayerRef->SetLCollision();
 				UE_LOG(LogTemp, Warning, TEXT("id_fightL"));
 			}
-		FTimerHandle Timer;
 		GetWorld()->GetTimerManager().SetTimer(Timer, [&]()
 		{
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
