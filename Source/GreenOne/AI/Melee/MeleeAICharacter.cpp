@@ -60,12 +60,14 @@ void AMeleeAICharacter::SetCollision()
 	{
 		L_ArmCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		L_ArmCollider->SetGenerateOverlapEvents(true);
+		L_ArmCollider->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 		UE_LOG(LogTemp, Warning, TEXT("Enable L_collision"));
 	}
 	if(R_ArmCollider)
 	{
 		R_ArmCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		R_ArmCollider->SetGenerateOverlapEvents(true);
+		R_ArmCollider->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 		UE_LOG(LogTemp, Warning, TEXT("Enable R_collision"));
 	}
 }
@@ -166,7 +168,7 @@ void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* O
 			UE_LOG(LogTemp, Warning, TEXT("2eme hit"));
 			//UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, SweepResult.BoneName, this);
-			//EndCollision();
+			EndCollision();
 			return;
 		}
 	}
