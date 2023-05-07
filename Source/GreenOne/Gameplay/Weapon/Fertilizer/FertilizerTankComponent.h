@@ -103,6 +103,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Unlock(const FertilizerType Type);
 	void SwitchFertilizerEquip();
+	bool IsFertilizerActve() const;
 
 	FertilizerType GetCurrentFertilizerType() const;
 	

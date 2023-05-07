@@ -3,6 +3,7 @@
 
 #include "FertilizerFactory.h"
 
+#include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerExplosion.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerOther.h"
 #include "GreenOne/Gameplay/Effects/Fertilizer/FertilizerSlowDown.h"
 
@@ -26,7 +27,7 @@ UFertilizerBase* FertilizerFactory::Factory(UObject* Context, FertilizerType Typ
 		Fertilizer = InitFertilizer<UFertilizerSlowDown>(Context,FertilizerBase);
 		break;
 	case FertilizerType::AttackBonus:
-		Fertilizer = InitFertilizer<UFertilizerBase>(Context,FertilizerBase);
+		Fertilizer = InitFertilizer<UFertilizerExplosion>(Context,FertilizerBase);
 		break;
 	case FertilizerType::Other:
 		Fertilizer = InitFertilizer<UFertilizerOther>(Context,FertilizerBase);

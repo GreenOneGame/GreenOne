@@ -69,9 +69,12 @@ public:
 	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 	UFUNCTION(BlueprintCallable)
 	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
-	void ResetParticleEffect(const UNiagaraSystem* Particle) const;
+	void ResetParticleEffect(UNiagaraSystem* Particle) const;
 	void ResetMaterialEffect() const;
 	void ResetAllParticle() const;
+
+	void ExplosionEffect();
+	void SetDamageZone(float AddDamage); 
 #pragma endregion 
 	
 	UFUNCTION(BlueprintCallable)
@@ -121,6 +124,17 @@ protected:
 	TArray<UMaterialInterface*> MatTreshold;
 
 	FTimerHandle TimeToResetEffect;
+
+	bool bActiveExplosionEffect = false;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float RadiusZone = 3;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float MaxDamageZonePourcent = 200.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float DamageZonePourcent = 140.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float DamageZone;
+	float DamageZoneTemp;
 
 private:
 
