@@ -113,6 +113,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
 
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Immortal = false;
+	
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
 	 */
@@ -190,10 +193,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Invisible = false;
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Immortal = false;
-
+	
 	UFUNCTION()
 	void Respawn();
 
