@@ -10,7 +10,6 @@
 #include "GreenOne/Widget/W_LoadingScreen.h"
 #include "MoviePlayer.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "GreenOne/Gameplay/GreenOneCharacter.h"
 
 // Level Sequence
 #include "LevelSequenceActor.h"
