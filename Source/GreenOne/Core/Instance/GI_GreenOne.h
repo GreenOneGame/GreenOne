@@ -162,6 +162,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Save")
 		int SaveIndex = 0;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Custom|Cinematique")
+	class ULevelSequence* LevelCineIntro;
+
 private:
 
 	UPROPERTY()
@@ -180,6 +183,9 @@ private:
 	// Vrai function qui applique toutes les valeurs.
 	UFUNCTION()
 		void ApplyLocation();
+
+	UFUNCTION()
+		void LaunchCinematique();
 
 #pragma endregion
 
