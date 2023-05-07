@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
 #include "InputActionValue.h"
+#include "Collectible/CollectorInterface.h"
 #include "GreenOne/Core/Factory/Fertilizer/FertilizerFactory.h"
+#include "Interactible/InteractorInterface.h"
 #include "GreenOneCharacter.generated.h"
 
 enum class FertilizerType : uint8;
@@ -14,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootSignature, FertilizerType, T
 
 class UInputAction;
 UCLASS(config=Game)
-class AGreenOneCharacter : public ACharacter, public IEntityGame
+class AGreenOneCharacter : public ACharacter, public IEntityGame, public IInteractorInterface, public ICollectorInterface
 {
 	GENERATED_BODY()
 
@@ -110,6 +113,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
 
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool Immortal = false;
+	
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
 	 */
@@ -126,6 +132,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, BlueprintAssignable)
 	FOnPlayerDeath OnPlayerDeath;
 
+	class IInteractibleActorInterface* InteractibleActorInterface = nullptr;
+	
 protected:
 
 	void Move(const FInputActionValue& Value);
@@ -185,10 +193,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Invisible = false;
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Immortal = false;
-
+	
 	UFUNCTION()
 	void Respawn();
 
@@ -205,6 +210,11 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE UCameraComponent* GetOwnerFollowCamera() const { return FollowCamera; }
+
+#pragma region Interact
+	virtual void SetInteractibleActor(class IInteractibleActorInterface* InteractibleActor);
+	virtual IInteractibleActorInterface* GetInteractibleActor() const;
+#pragma endregion 
 
 #pragma region Shoot
 
@@ -238,6 +248,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Custom|Combat")
 	void StopShoot();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Animation")
+	const FVector GetLocationToAim() { return LocationToAim; };
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0), Category = "Custom|Combat")
 	float DamagePlayer = 10.f;
 
@@ -269,6 +282,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
 	float ShootCooldownRemaining;
 
+	class USoundBase* ShootSound;
+
 private:
 
 	FVector LocationToAim;
@@ -289,30 +304,26 @@ private:
 
 #pragma region Mode
 public:
-
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 	UFUNCTION(BlueprintCallable)
-		void CanRegenerate();
+	void CanRegenerate();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom|Player")
-		bool IsCombatMode = false;
-
-
+	bool IsCombatMode = false;
+	
 	UFUNCTION(BlueprintCallable)
-		void Regenerate(float DeltaSeconds);
+	void Regenerate(float DeltaSeconds);
 
 	UPROPERTY(BlueprintAssignable)
-		FOnRegen OnRegen;
-
+	FOnRegen OnRegen;
+	
 private:
 	FTimerHandle TimerRegen;
-
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
-	float CoolDown = 5.f;
-
+	float CoolDown = 10.f;
 #pragma endregion 
 
 #pragma region Pause

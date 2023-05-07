@@ -23,13 +23,39 @@ public:
 
 	virtual void Init();
 
+#pragma region LoadLevel
+
 	UFUNCTION(BlueprintCallable)
-		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef, const FName CallFunction, const bool ShouldUnload = true);
+		void LoadOneLevel(const FName LevelToLoad, UObject* TargetRef = nullptr, const FName CallFunction = "", const bool ShouldUnload = false);
+
+	UFUNCTION()
+		void BeginLoadingScreen(const FString& MapName);
+
+private:
+
+	UFUNCTION()
+		void UnloadMap();
+
+	UFUNCTION()
+		void CallFunctionAndRemoveLoading();
+
+	bool bShouldUnload;
+
+	FName LevelToUnload;
+
+	FName CallFunctionRef;
+
+	UObject* ObjectTargetRef;
 
 #pragma region Loading Screen
 
+public:
+
 	UPROPERTY(EditDefaultsOnly, Category = "Loading Screen")
 		TSubclassOf<class UUserWidget> LoadingScreenClass;
+
+	UPROPERTY(EditAnywhere, Category = "Reference")
+		TSoftObjectPtr<class UWorld> MapMenuRef;
 
 
 	/**
@@ -48,6 +74,7 @@ public:
 
 private:
 
+	UPROPERTY()
 	class UUserWidget* CurrentLoadingScreen;
 
 #pragma endregion
@@ -210,6 +237,7 @@ private:
 	UFUNCTION()
 		void ApplyAudioSettings();
 
+	UPROPERTY()
 	class USG_AudioSettings* AudioSettingsRef;
 
 #pragma endregion

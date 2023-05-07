@@ -5,7 +5,7 @@
 
 FertilizerTankStruct::FertilizerTankStruct()
 {
-	GaugeValue = MaxGaugeValue;
+	GaugeValue = 0.f;
 }
 
 void FertilizerTankStruct::UpdateGauge()
@@ -14,18 +14,24 @@ void FertilizerTankStruct::UpdateGauge()
 	ClampGaugeValue();
 }
 
+void FertilizerTankStruct::AddFertilizer(float NewGaugeValue)
+{
+	GaugeValue += NewGaugeValue;
+	ClampGaugeValue();
+}
+
 void FertilizerTankStruct::ClampGaugeValue()
 {
-	if(GaugeValue >= MaxGaugeValue)
+	if (GaugeValue >= MaxGaugeValue)
 	{
 		GaugeValue = MaxGaugeValue;
 		return;
 	}
-	
-	if(GaugeValue <= 0)
+
+	if (GaugeValue <= 0)
 	{
 		GaugeValue = 0;
-	}	
+	}
 }
 
 // Sets default values for this component's properties
@@ -34,70 +40,84 @@ UFertilizerTankComponent::UFertilizerTankComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
-
 
 // Called when the game starts
 void UFertilizerTankComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
+	if (AGreenOneCharacter* Character = Cast<AGreenOneCharacter>(GetOwner()))
 	{
 		//Character->OnShootDelegate.AddDynamic(this, &UFertilizerTankComponent::OnShoot);
-	}else
+	}
+	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Can't Cast GetOwner, GetOwner is maybe not find !"));
 	}
-	
+	//InitUIFertilizer();
 }
 
 
 // Called every frame
-void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFertilizerTankComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                             FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	
+
 #if WITH_EDITOR
 
-	if(bDrawDebugValues)
+	if (bDrawDebugValues)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Red, FString::Printf(TEXT("Current Fertilizer Type : %s"),*GetFertilizerTypeName()), true, FVector2d(1.2, 1.2));
+		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Red,
+		                                 FString::Printf(
+			                                 TEXT("Current Fertilizer Type : %s"), *GetFertilizerTypeName()), true,
+		                                 FVector2d(1.2, 1.2));
 		Struct = GetCurrentFertilizerTankActive();
-		if(Struct)
+		if (Struct)
 		{
-			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green, FString::Printf(TEXT("Fertilizer Max Gauge Value : %f"), Struct->MaxGaugeValue), true, FVector2d(1.2, 1.2));
-			GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Red, FString::Printf(TEXT("Fertilizer Reduce Gauge Value : %f"), Struct->ReduceGaugeValue), true, FVector2d(1.2, 1.2));
-			GEngine->AddOnScreenDebugMessage(4, .1f, FColor::Blue, FString::Printf(TEXT("Fertilizer Gauge Value : %f"), Struct->GaugeValue), true, FVector2d(1.2, 1.2));
-		}	
+			GEngine->AddOnScreenDebugMessage(2, .1f, FColor::Green,
+			                                 FString::Printf(
+				                                 TEXT("Fertilizer Max Gauge Value : %f"), Struct->MaxGaugeValue), true,
+			                                 FVector2d(1.2, 1.2));
+			GEngine->AddOnScreenDebugMessage(3, .1f, FColor::Red,
+			                                 FString::Printf(
+				                                 TEXT("Fertilizer Reduce Gauge Value : %f"), Struct->ReduceGaugeValue),
+			                                 true, FVector2d(1.2, 1.2));
+			GEngine->AddOnScreenDebugMessage(4, .1f, FColor::Blue,
+			                                 FString::Printf(TEXT("Fertilizer Gauge Value : %f"), Struct->GaugeValue),
+			                                 true, FVector2d(1.2, 1.2));
+		}
 	}
 
 
 #endif
-	
 }
 
 bool UFertilizerTankComponent::IsTypeExist(const FertilizerType Type) const
 {
-	if(Type == FertilizerType::None) return false;
+	if (Type == FertilizerType::None) return false;
 
-	if(!FertilizerTanks.Contains(Type)) return false;
+	if (!FertilizerTanks.Contains(Type)) return false;
 
 	return true;
-	
 }
 
 void UFertilizerTankComponent::OnShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnShoot Update Fertilizer Tank"));
-		
-	if(FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
+
+	if (!bFertilizerActive) return;
+
+	if (FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		CurrentFertilizerTankActive->UpdateGauge();
-		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),CurrentFertilizerTankActive->GaugeValue);	
-	}else
+		OnActionFertilizerDelegate.Broadcast(0, CurrentFertilizerTankActive->GaugeValue, CurrentFertilizerTankActive->ColorInfo);
+		UE_LOG(LogTemp, Warning, TEXT("Current Fertilizer Tank gauge value : %f"),
+		       CurrentFertilizerTankActive->GaugeValue);
+	}
+	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Fertilizer Tank is not exist !"));
 	}
@@ -105,9 +125,9 @@ void UFertilizerTankComponent::OnShoot()
 
 bool UFertilizerTankComponent::IsTankEmpty(const FertilizerType Type)
 {
-	if(Type == FertilizerType::None) return true;
+	if (Type == FertilizerType::None) return true;
 
-	if(const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
+	if (const FertilizerTankStruct* CurrentFertilizerTankActive = GetCurrentFertilizerTankActive())
 	{
 		return CurrentFertilizerTankActive->GaugeValue <= 0 ? true : false;
 	}
@@ -120,30 +140,76 @@ void UFertilizerTankComponent::UpdateFertilizerType(FertilizerType Type)
 	EFertilizerType = Type;
 }
 
+void UFertilizerTankComponent::InitUIFertilizer()
+{
+	FertilizerPrimaryType = FertilizerType::SlowDown;
+	FertilizerSecondaryType = FertilizerType::AttackBonus;
+
+	EventAction();
+}
+
+void UFertilizerTankComponent::Equip()
+{
+	bFertilizerActive = !bFertilizerActive;
+	OnActiveFertilizerDelegate.Broadcast(bFertilizerActive);
+}
+
+void UFertilizerTankComponent::Unlock(const FertilizerType Type)
+{
+	SetFertilizerValueByType(Type,100);
+}
+
+void UFertilizerTankComponent::SwitchFertilizerEquip()
+{
+	
+	const FertilizerType Temp = FertilizerPrimaryType;
+	FertilizerPrimaryType = FertilizerSecondaryType;
+	FertilizerSecondaryType = Temp;
+
+	EventAction();
+}
+
+bool UFertilizerTankComponent::IsFertilizerActve() const
+{
+	if(bFertilizerActive) return true;
+
+	return false;
+}
+
 FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
 {
-	return EFertilizerType;
+	return FertilizerPrimaryType;
 }
 
 UFertilizerBase* UFertilizerTankComponent::GetEffect()
 {
-	if(!IsTypeExist(EFertilizerType)) return nullptr;
+	if (!IsTypeExist(FertilizerPrimaryType)) return nullptr;
 
-	if(const FertilizerTankStruct* FertilizerTankStruct = GetCurrentFertilizerTankActive())
+	if (const FertilizerTankStruct* Primary = GetFertilizerTankByType(FertilizerPrimaryType))
 	{
-		if(!FertilizerTankStruct->Effect) return  nullptr;
-		
-		return FertilizerFactory::Factory(EFertilizerType, FertilizerTankStruct->Effect);
+		if (!Primary->Effect) return nullptr;
+
+		return FertilizerFactory::Factory(this, FertilizerPrimaryType, Primary->Effect);
 	}
-	
+
 	return nullptr;
 }
 
 FertilizerTankStruct* UFertilizerTankComponent::GetCurrentFertilizerTankActive()
 {
-	if(!IsTypeExist(EFertilizerType)) return nullptr;
-	
-	return FertilizerTanks.Find(EFertilizerType);
+	if (FertilizerTankStruct* CurrentFertilizerActive =  GetFertilizerTankByType(FertilizerPrimaryType))
+	{
+		return CurrentFertilizerActive;
+	}
+
+	return nullptr;
+}
+
+FertilizerTankStruct* UFertilizerTankComponent::GetFertilizerTankByType(FertilizerType Type)
+{
+	if (!IsTypeExist(Type)) return nullptr;
+
+	return FertilizerTanks.Find(Type);
 }
 
 FString UFertilizerTankComponent::GetFertilizerTypeName() const
@@ -164,3 +230,24 @@ FString UFertilizerTankComponent::GetFertilizerTypeName() const
 	return FString(TEXT("Aucun"));
 }
 
+void UFertilizerTankComponent::SetFertilizerValueByType(FertilizerType Type, float Value)
+{
+	if (FertilizerTankStruct* FertilizerTank = GetFertilizerTankByType(Type))
+	{
+		FertilizerTank->AddFertilizer(Value);
+
+		if(Type == FertilizerPrimaryType)
+			OnActionFertilizerDelegate.Broadcast(0, FertilizerTank->GaugeValue, FertilizerTank->ColorInfo);
+		else if(Type == FertilizerSecondaryType)
+			OnActionFertilizerDelegate.Broadcast(1, FertilizerTank->GaugeValue, FertilizerTank->ColorInfo);
+	}
+}
+
+void UFertilizerTankComponent::EventAction()
+{
+	if(const FertilizerTankStruct* Primary = GetFertilizerTankByType(FertilizerPrimaryType))
+		OnActionFertilizerDelegate.Broadcast(0, Primary->GaugeValue, Primary->ColorInfo);
+
+	if(const FertilizerTankStruct* Secondary = GetFertilizerTankByType(FertilizerSecondaryType))
+		OnActionFertilizerDelegate.Broadcast(1, Secondary->GaugeValue, Secondary->ColorInfo);
+}

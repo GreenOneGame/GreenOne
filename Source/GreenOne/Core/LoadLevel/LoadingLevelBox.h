@@ -42,11 +42,14 @@ public:
 
 private:
 
-	AActor* PlayerRef;
+	class ACharacter* PlayerRef;
 
-	UFUNCTION()
-	void OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	// UFUNCTION()
+	// void OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	//Methode temporaire
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	
 	UFUNCTION()
 	void TpPlayer();
 

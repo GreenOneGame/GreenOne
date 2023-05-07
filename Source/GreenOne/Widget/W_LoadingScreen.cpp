@@ -3,18 +3,14 @@
 
 #include "W_LoadingScreen.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/LevelStreaming.h"
+#include "GreenOne/Core/Instance/GI_GreenOne.h"
+//#include "MoviePlayer.h"
 
 
-float UW_LoadingScreen::GetLoadingPercent()
+void UW_LoadingScreen::RemoveLoading_Implementation()
 {
-	return 0.0f;
 }
 
-void UW_LoadingScreen::CheckLoadingProcess()
-{
-	if (TInfo != nullptr)
-	{
-		TInfo->SetText(FText::FromString(GetWorld()->GetLatentActionManager().GetDescription(GetWorld(), 0)));
-	}
-}
 

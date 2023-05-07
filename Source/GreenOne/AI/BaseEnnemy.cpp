@@ -26,6 +26,8 @@ ABaseEnnemy::ABaseEnnemy()
 	
 
 	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +49,12 @@ void ABaseEnnemy::BeginPlay()
 	{
 		LifeBarComponent->SetHiddenInGame(true);
 	}
+	DamageZoneTemp = DamageZone;
+}
+
+void ABaseEnnemy::FellOutOfWorld(const UDamageType& dmgType)
+{
+	DeadEntity();
 }
 
 float ABaseEnnemy::GetPercentHealth()
@@ -62,6 +70,92 @@ void ABaseEnnemy::EntityTakeEffect_Implementation(UEffect* Effect, AActor* Sourc
 	else
 		Effect->ApplyEffect(this, Source);
 	
+}
+
+void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
+{
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
+		{
+			UpdateMaxSpeed(MaxSpeed);
+			ResetParticleEffect(Effect->GetParticleEffect());
+			ResetMaterialEffect();
+		
+			ExplosionEffect();	
+			
+		}, DelayToReset, false);
+}
+
+void ABaseEnnemy::ResetParticleEffect(UNiagaraSystem* Particle) const
+{
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		if(UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(ActorComponent))
+		{
+			if(NiagaraComponent->GetAsset() == Particle)
+			{
+				NiagaraComponent->DestroyComponent();
+			}
+		}
+	}
+}
+
+void ABaseEnnemy::ResetMaterialEffect() const
+{
+	if(UMeshComponent* MeshComponent = FindComponentByClass<UMeshComponent>())
+	{
+		MeshComponent->SetOverlayMaterial(nullptr);
+	}
+}
+
+void ABaseEnnemy::ResetAllParticle() const
+{
+	TArray<UActorComponent*> UActorComponents;
+	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
+	for (UActorComponent* ActorComponent : UActorComponents)
+	{
+		ActorComponent->SetActive(false);
+	}
+}
+
+void ABaseEnnemy::ExplosionEffect()
+{
+	if(!bActiveExplosionEffect) return;
+	
+	TArray<AActor*> IgnoresActor;
+	IgnoresActor.Push(this);
+
+	TArray<FHitResult> ActorsHit;
+	bool Hit = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), RadiusZone,  UEngineTypes::ConvertToTraceType(ECC_Pawn), false, IgnoresActor, EDrawDebugTrace::ForOneFrame
+		,ActorsHit, true, FLinearColor::Green);
+
+	DrawDebugSphere(GetWorld(), GetActorLocation(), RadiusZone, 8, FColor::Red, false, 3);
+	
+	if(Hit)
+	{
+		for(FHitResult ActorHit : ActorsHit)
+		{
+			if(AActor* Actor = ActorHit.GetActor())
+			{
+				if(Actor->Implements<UEntityGame>())
+				{
+					IEntityGame::Execute_EntityTakeDamage(ActorHit.GetActor(), DamageZoneTemp, ActorHit.BoneName, this);
+				}
+			}
+		}
+		bActiveExplosionEffect = false;	
+	}
+}
+
+void ABaseEnnemy::SetDamageZone(float AddPercentDamage)
+{
+	bActiveExplosionEffect = true;
+	if(DamageZonePourcent < MaxDamageZonePourcent)
+	{
+		DamageZonePourcent += AddPercentDamage;
+		DamageZoneTemp += (DamageZone * 20.f) / DamageZonePourcent;
+	}
 }
 
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
@@ -139,14 +233,14 @@ void ABaseEnnemy::DeadEntity()
 	Cast<AAIController>(GetController())->GetBrainComponent()->StopLogic("Because");
 	if (SpawnerRef != nullptr)
 	{
-		UE_LOG(LogTemp,Warning, TEXT("OK"));
 		SpawnerRef->RemoveEntityFromList(this);
-		FTimerHandle TimerHandle;
 		DrawLifeBar = false;
+		ResetAllParticle();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 	}
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseEnnemy::DestroyActor, 5.0f, false);
 }
 
 void ABaseEnnemy::DestroyActor()

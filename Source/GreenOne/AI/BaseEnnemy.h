@@ -3,12 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/Character.h"
 #include "GreenOne/Gameplay/EntityGame.h"
+#include "GreenOne/Gameplay/Effects/ActorEffectInterface.h"
 #include "BaseEnnemy.generated.h"
 
 UCLASS()
-class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame
+class GREENONE_API ABaseEnnemy : public ACharacter, public IEntityGame, public IActorEffectInterface
 {
 	GENERATED_BODY()
 	
@@ -24,6 +26,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void FellOutOfWorld(const class UDamageType& dmgType) override;
 
 public:
 
@@ -60,10 +64,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Custom|Damage")
 	void EntityTakeDamage(float DamageApply, FName BoneNameHit, AActor* DamageSource = nullptr);
 
+#pragma region Effect
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EntityTakeEffect(UEffect* Effect, AActor* Source = nullptr);
 	UFUNCTION(BlueprintCallable)
-	virtual void ResetEffect(float DelayToReset){};
+	virtual void ResetEffect(UEffect* Effect, const float DelayToReset);
+	void ResetParticleEffect(UNiagaraSystem* Particle) const;
+	void ResetMaterialEffect() const;
+	void ResetAllParticle() const;
+
+	void ExplosionEffect();
+	void SetDamageZone(float AddDamage); 
+#pragma endregion 
 	
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerRef(AActor* ref);
@@ -112,6 +124,17 @@ protected:
 	TArray<UMaterialInterface*> MatTreshold;
 
 	FTimerHandle TimeToResetEffect;
+
+	bool bActiveExplosionEffect = false;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float RadiusZone = 3;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float MaxDamageZonePourcent = 200.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float DamageZonePourcent = 140.f;
+	UPROPERTY(EditAnywhere, Category = "Custom|Effect|Explosion")
+	float DamageZone;
+	float DamageZoneTemp;
 
 private:
 
