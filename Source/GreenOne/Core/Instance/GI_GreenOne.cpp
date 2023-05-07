@@ -136,10 +136,6 @@ void UGI_GreenOne::DisplayLoadingScreen()
 	{
 		CurrentLoadingScreen->AddToViewport();
 		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetWorld()->GetFirstPlayerController(), CurrentLoadingScreen, EMouseLockMode::DoNotLock, true);
-
-		// Le joueur est immortel pendant le chargement
-		AGreenOneCharacter* Player = Cast<AGreenOneCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		if (Player) { Player->Immortal = true; }
 	}
 }
 
@@ -155,10 +151,6 @@ void UGI_GreenOne::RemoveLoadingScreen()
 		if (UW_LoadingScreen* CurrentLScreen = Cast<UW_LoadingScreen>(CurrentLoadingScreen))
 		{
 			CurrentLScreen->RemoveLoading();
-
-			// Le joueur est immortel pendant le chargement
-			AGreenOneCharacter* Player = Cast<AGreenOneCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-			if (Player) {	Player->Immortal = false; }
 		}
 	}
 }
