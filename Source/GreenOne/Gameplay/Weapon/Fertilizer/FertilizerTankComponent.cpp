@@ -154,6 +154,11 @@ void UFertilizerTankComponent::Equip()
 	OnActiveFertilizerDelegate.Broadcast(bFertilizerActive);
 }
 
+void UFertilizerTankComponent::Unlock(const FertilizerType Type)
+{
+	SetFertilizerValueByType(Type,100);
+}
+
 void UFertilizerTankComponent::SwitchFertilizerEquip()
 {
 	
