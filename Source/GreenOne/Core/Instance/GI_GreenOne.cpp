@@ -12,6 +12,11 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GreenOne/Gameplay/GreenOneCharacter.h"
 
+// Level Sequence
+#include "LevelSequenceActor.h"
+#include "LevelSequencePlayer.h"
+#include "MovieSceneSequencePlayer.h"
+
 UGI_GreenOne::UGI_GreenOne() : UGameInstance()
 {
 	SaveClass = USG_GreenOne::StaticClass();
@@ -257,6 +262,12 @@ void UGI_GreenOne::ApplySaveData()
 	UE_LOG(LogTemp, Warning, TEXT("Apply Save."));
 	if (!CurrentSave) { return; }
 
+	if (CurrentSave->bIsFirstTime)
+	{
+		CurrentSave->bIsFirstTime = false;
+		LoadOneLevel(CurrentSave->MapName, this, FName("LaunchCinematique"));
+		return;
+	}
 	LoadOneLevel(CurrentSave->MapName, this, FName("ApplyLocation"));
 }
 
@@ -285,14 +296,34 @@ void UGI_GreenOne::ApplyLocation()
 {
 	//FTimerHandle SetLocatioHandle;
 	//GetWorld()->GetTimerManager().SetTimer(SetLocatioHandle, [&]() {
-		APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-		if (!PlayerRef)
-		{
-			return;
-		}
+	;
+	if (APawn* PlayerRef = UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
+	{
 		PlayerRef->SetActorLocation(CurrentSave->PlayerLocation);
-		PlayerRef->SetActorRotation(CurrentSave->PlayerRotation);
+		return;
+	}
+	if (APlayerController* PlayerControllerRef = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		PlayerControllerRef->SetControlRotation(CurrentSave->PlayerRotation);
+	}
 	//}, 0.5f, false);
+}
+
+void UGI_GreenOne::LaunchCinematique()
+{
+	ApplyLocation();
+	if (LevelCineIntro == nullptr)
+	{
+		return;
+	}
+	FMovieSceneSequencePlaybackSettings PlaySettings;
+	PlaySettings.bAutoPlay = true;
+	PlaySettings.bDisableLookAtInput = true;
+	PlaySettings.bDisableMovementInput = true;
+	PlaySettings.bHideHud = true;
+	ALevelSequenceActor* LevelSequenceActor;
+	ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), LevelCineIntro, PlaySettings, LevelSequenceActor)->Play();
+	
 }
 
 #pragma endregion
