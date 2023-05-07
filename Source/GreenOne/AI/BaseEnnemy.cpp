@@ -26,6 +26,8 @@ ABaseEnnemy::ABaseEnnemy()
 	
 
 	DamageComp = CreateDefaultSubobject<UAC_DisplayDamage>(TEXT("DamageComp"));
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +49,7 @@ void ABaseEnnemy::BeginPlay()
 	{
 		LifeBarComponent->SetHiddenInGame(true);
 	}
+	DamageZoneTemp = DamageZone;
 }
 
 void ABaseEnnemy::FellOutOfWorld(const UDamageType& dmgType)
@@ -76,10 +79,13 @@ void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 			UpdateMaxSpeed(MaxSpeed);
 			ResetParticleEffect(Effect->GetParticleEffect());
 			ResetMaterialEffect();
+		
+			ExplosionEffect();	
+			
 		}, DelayToReset, false);
 }
 
-void ABaseEnnemy::ResetParticleEffect(const UNiagaraSystem* Particle) const
+void ABaseEnnemy::ResetParticleEffect(UNiagaraSystem* Particle) const
 {
 	TArray<UActorComponent*> UActorComponents;
 	GetComponents(UNiagaraComponent::StaticClass(),UActorComponents);
@@ -112,7 +118,46 @@ void ABaseEnnemy::ResetAllParticle() const
 		ActorComponent->SetActive(false);
 	}
 }
+
+void ABaseEnnemy::ExplosionEffect()
+{
+	if(!bActiveExplosionEffect) return;
 	
+	TArray<AActor*> IgnoresActor;
+	IgnoresActor.Push(this);
+
+	TArray<FHitResult> ActorsHit;
+	bool Hit = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), RadiusZone,  UEngineTypes::ConvertToTraceType(ECC_Pawn), false, IgnoresActor, EDrawDebugTrace::ForOneFrame
+		,ActorsHit, true, FLinearColor::Green);
+
+	DrawDebugSphere(GetWorld(), GetActorLocation(), RadiusZone, 8, FColor::Red, false, 3);
+	
+	if(Hit)
+	{
+		for(FHitResult ActorHit : ActorsHit)
+		{
+			if(AActor* Actor = ActorHit.GetActor())
+			{
+				if(Actor->Implements<UEntityGame>())
+				{
+					IEntityGame::Execute_EntityTakeDamage(ActorHit.GetActor(), DamageZoneTemp, ActorHit.BoneName, this);
+				}
+			}
+		}
+		bActiveExplosionEffect = false;	
+	}
+}
+
+void ABaseEnnemy::SetDamageZone(float AddPercentDamage)
+{
+	bActiveExplosionEffect = true;
+	if(DamageZonePourcent < MaxDamageZonePourcent)
+	{
+		DamageZonePourcent += AddPercentDamage;
+		DamageZoneTemp += (DamageZone * 20.f) / DamageZonePourcent;
+	}
+}
+
 void ABaseEnnemy::SetPlayerRef(AActor* ref)
 {
 	if (AAIController* AIController = Cast<AAIController>(Controller))
