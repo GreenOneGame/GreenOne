@@ -114,7 +114,7 @@ public:
 	bool IsAtk;
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Immortal = false;
+		bool Immortal = false;
 	
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
