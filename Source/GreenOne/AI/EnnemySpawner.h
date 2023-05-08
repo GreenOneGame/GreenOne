@@ -91,8 +91,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
 		int NbrWave = 2;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
+		bool bDebug = true;
+
 
 private:
+
+	UFUNCTION()
+		void Unbreak();
 
 	FTimerHandle SpawnHandler;
 
