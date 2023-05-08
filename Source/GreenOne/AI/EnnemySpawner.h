@@ -103,9 +103,10 @@ private:
 	UFUNCTION()
 		void Unbreak();
 
+	UPROPERTY()
 	FTimerHandle SpawnHandler;
 
-
+	UPROPERTY()
 	FTimerHandle UnbreakHandler;
 
 	void TriggerSpawnEntity();
@@ -124,8 +125,10 @@ private:
 
 	float CurrentTimerRemaing;
 
+	UPROPERTY()
 	TArray<class ABaseEnnemy*> EntityList;
 
+	UPROPERTY()
 	AActor* PlayerRef;
 
 };
