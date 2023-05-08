@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GreenOne/AI/BaseEnnemy.h"
 #include "FlyingAICharacter.generated.h"
 
