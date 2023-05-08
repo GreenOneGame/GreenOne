@@ -551,3 +551,8 @@ void AGreenOneCharacter::Regenerate(float DeltaSeconds)
 		OnRegen.Broadcast();
 	}
 }
+
+void AGreenOneCharacter::ResetAttackCac()
+{
+	IsAtk = false;
+}

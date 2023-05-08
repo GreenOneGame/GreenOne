@@ -64,7 +64,9 @@ private:
 #pragma region AnimationValue
 public:
 	
-	void StopMouv();	
+	void StopMouv();
+
+	virtual void DeadEntity() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanDash() { return !IsDashing; };

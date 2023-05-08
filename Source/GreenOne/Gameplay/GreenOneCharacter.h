@@ -318,6 +318,9 @@ private:
 public:
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee", DisplayName = "Activer l'animation du kick")
+	bool CanAnimKick = false;
 	
 	UFUNCTION(BlueprintCallable)
 	void CanRegenerate();
@@ -330,6 +333,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRegen OnRegen;
+
+	UFUNCTION(BlueprintCallable)
+	void ResetAttackCac();
 	
 private:
 
