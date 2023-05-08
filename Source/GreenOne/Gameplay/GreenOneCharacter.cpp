@@ -449,9 +449,10 @@ void AGreenOneCharacter::TogglePauseGame()
 	if (GetWorld()->IsPaused())
 	{
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
-		if (PauseWidgetRef)
+		if (PauseWidgetRef != nullptr)
 		{
-			PauseWidgetRef->SetVisibility(ESlateVisibility::Collapsed);
+			PauseWidgetRef->RemoveFromParent();
+			PauseWidgetRef = nullptr;
 			ControllerRef->SetShowMouseCursor(false);
 			UWidgetBlueprintLibrary::SetInputMode_GameOnly(ControllerRef);
 		}
@@ -459,17 +460,13 @@ void AGreenOneCharacter::TogglePauseGame()
 	else
 	{
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
-		if (!PauseWidgetRef)
+		if (PauseWidgetRef == nullptr)
 		{
 			PauseWidgetRef = CreateWidget<UUserWidget>(ControllerRef, PauseWidgetClass);
 			PauseWidgetRef->AddToViewport();
-		}
-		else
-		{
-			PauseWidgetRef->SetVisibility(ESlateVisibility::Visible);
+			UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(ControllerRef, PauseWidgetRef);
 		}
 		ControllerRef->SetShowMouseCursor(true);
-		UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(ControllerRef, PauseWidgetRef);
 	}
 }
 
