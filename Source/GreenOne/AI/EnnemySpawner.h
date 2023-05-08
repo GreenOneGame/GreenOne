@@ -94,6 +94,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom")
 		bool bDebug = true;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom")
+		float TimerUnbreak = 20.f;
+
 
 private:
 
@@ -101,6 +104,9 @@ private:
 		void Unbreak();
 
 	FTimerHandle SpawnHandler;
+
+
+	FTimerHandle UnbreakHandler;
 
 	void TriggerSpawnEntity();
 

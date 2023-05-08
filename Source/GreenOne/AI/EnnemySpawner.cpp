@@ -110,6 +110,10 @@ void AEnnemySpawner::NotifyActorBeginOverlap(AActor* OtherActor)
 
 void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 {
+	if (bDebug)
+	{
+		GetWorld()->GetTimerManager().SetTimer(UnbreakHandler, this, &AEnnemySpawner::Victory, TimerUnbreak, false);
+	}
 	EntityList.Remove(entity);
 	if (bShouldKillAllEnnemys)
 	{
