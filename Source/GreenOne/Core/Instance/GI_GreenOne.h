@@ -39,6 +39,7 @@ private:
 	UFUNCTION()
 		void CallFunctionAndRemoveLoading();
 
+	UPROPERTY()
 	bool bShouldUnload;
 
 	FName LevelToUnload;
