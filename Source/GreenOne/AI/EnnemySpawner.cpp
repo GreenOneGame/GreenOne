@@ -124,6 +124,10 @@ void AEnnemySpawner::RemoveEntityFromList(ABaseEnnemy* entity)
 	}
 }
 
+void AEnnemySpawner::Unbreak()
+{
+}
+
 /// <summary>
 /// Triggers the spawning of an enemy entity with a delay between each spawn.
 /// </summary>
