@@ -102,6 +102,7 @@ public:
 
 private:
 
+	UPROPERTY()
 	bool bIsShooting = false;
 
 #pragma endregion
@@ -159,8 +160,10 @@ private:
 	UFUNCTION()
 	void OnShinderu(float NbrDamage);
 
+	UPROPERTY()
 	class USoundBase* SoundClass;
 
+	UPROPERTY()
 	class UAudioComponent* AudioWarning;
 
 	bool IsAlreadyDead = false;
@@ -181,6 +184,7 @@ private:
 
 	float TimeRemainingForShoot = 0;
 
+	UPROPERTY()
 	FTimerHandle ShootTimer;
 
 #pragma endregion

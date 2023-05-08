@@ -123,6 +123,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Combat")
 	TArray<UMaterialInterface*> MatTreshold;
 
+	UPROPERTY()
 	FTimerHandle TimeToResetEffect;
 
 	bool bActiveExplosionEffect = false;
