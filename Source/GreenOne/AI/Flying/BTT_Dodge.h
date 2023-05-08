@@ -42,13 +42,16 @@ public:
 
 private:
 
+	UPROPERTY()
 	AController* ControllerRef;
 
+	UPROPERTY()
 	AActor* PlayerRef;
 
 	float DodgeDirection = 1.f;
 
 	float FlyingSpeedInit = 0.f;
 
+	UPROPERTY()
 	class UCharacterMovementComponent* CharaMovementComp;
 };
