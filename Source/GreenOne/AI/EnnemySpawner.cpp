@@ -63,6 +63,10 @@ void AEnnemySpawner::BeginPlay()
 	Super::BeginPlay();
 	// TriggerArena->OnComponentBeginOverlap.AddDynamic(this, &AEnnemySpawner::OnComponentActivate);
 	//PlayerRef = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if (bDebug)
+	{
+		GetWorld()->GetTimerManager().SetTimer(UnbreakHandler, this, &AEnnemySpawner::Victory, TimerUnbreak, false);
+	}
 }
 
 // Appelé chaque frame
@@ -215,12 +219,10 @@ FVector AEnnemySpawner::GetSpawnLocation()
 
 void AEnnemySpawner::Victory()
 {
-	if (NbrWave <= 0)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
-		WallsComponents->SetHiddenInGame(true, true);
-		WallsComponents->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+	GetWorld()->GetTimerManager().ClearTimer(SpawnHandler);
+	WallsComponents->SetHiddenInGame(true, true);
+	WallsComponents->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 }
 
 void AEnnemySpawner::SetPlayerRefToEntitys(AActor* ref)
