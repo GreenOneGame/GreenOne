@@ -43,6 +43,7 @@ public:
 
 private:
 
+	UPROPERTY()
 	AActor* PlayerRefActor;
 
 };

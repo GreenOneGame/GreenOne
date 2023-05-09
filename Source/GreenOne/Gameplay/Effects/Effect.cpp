@@ -13,6 +13,7 @@ UEffect::UEffect()
 
 void UEffect::Init()
 {
+	TimeEffect = MaxTimeEffect;
 	InitMaterialEffect();
 }
 

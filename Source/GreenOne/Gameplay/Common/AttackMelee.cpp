@@ -62,10 +62,10 @@ void UAttackMelee::Attack()
 
 	if (!bActiveCoolDown)
 		bActiveCoolDown = true;
-	else
-		return;
+	// else
+	// 	return;
 
-	DetectActors();
+	//DetectActors();
 }
 
 bool UAttackMelee::Conetrace(TArray<FHitResult>& TargetHits)

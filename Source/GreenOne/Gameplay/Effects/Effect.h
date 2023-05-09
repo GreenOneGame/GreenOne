@@ -20,7 +20,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Effect", DisplayName = "Active le temps d'effect")
 	bool bTimeEffect = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect", meta = (EditCondition="bTimeEffect"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect", DisplayName = "Durée d'effect max")
+	float MaxTimeEffect;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Effect", meta = (EditCondition="bTimeEffect"))
 	float TimeEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect|VFX|Particle", DisplayName = "Particle de l'effet")

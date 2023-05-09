@@ -154,6 +154,11 @@ void UFertilizerTankComponent::Equip()
 	OnActiveFertilizerDelegate.Broadcast(bFertilizerActive);
 }
 
+void UFertilizerTankComponent::Unlock(const FertilizerType Type)
+{
+	SetFertilizerValueByType(Type,100);
+}
+
 void UFertilizerTankComponent::SwitchFertilizerEquip()
 {
 	
@@ -164,20 +169,27 @@ void UFertilizerTankComponent::SwitchFertilizerEquip()
 	EventAction();
 }
 
+bool UFertilizerTankComponent::IsFertilizerActve() const
+{
+	if(bFertilizerActive) return true;
+
+	return false;
+}
+
 FertilizerType UFertilizerTankComponent::GetCurrentFertilizerType() const
 {
-	return EFertilizerType;
+	return FertilizerPrimaryType;
 }
 
 UFertilizerBase* UFertilizerTankComponent::GetEffect()
 {
-	if (!IsTypeExist(EFertilizerType)) return nullptr;
+	if (!IsTypeExist(FertilizerPrimaryType)) return nullptr;
 
 	if (const FertilizerTankStruct* Primary = GetFertilizerTankByType(FertilizerPrimaryType))
 	{
 		if (!Primary->Effect) return nullptr;
 
-		return FertilizerFactory::Factory(this, EFertilizerType, Primary->Effect);
+		return FertilizerFactory::Factory(this, FertilizerPrimaryType, Primary->Effect);
 	}
 
 	return nullptr;
