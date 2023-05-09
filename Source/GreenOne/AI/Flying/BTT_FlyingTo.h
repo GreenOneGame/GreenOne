@@ -77,14 +77,17 @@ public:
 
 private:
 
+	UPROPERTY()
 	AController* ControllerRef;
 
+	UPROPERTY()
 	FVector TargetLocation;
 
 	float InitialSpeed = 600.f;
 
 	float InitialAcceleration;
 
+	UPROPERTY()
 	class UCharacterMovementComponent* PawnMovementRef;
 
 	void TickAddInputToPawn(float Deltatime, class AFlyingAICharacter* BirdRef, FVector TargetLoc);

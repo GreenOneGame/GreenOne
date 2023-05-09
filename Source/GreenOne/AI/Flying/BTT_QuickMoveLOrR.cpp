@@ -108,13 +108,13 @@ void UBTT_QuickMoveLOrR::SetDash(UBehaviorTreeComponent& OwnerComp)
 	{
 		if(DirectionValue == -1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("gauche"));
+			//UE_LOG(LogTemp, Warning, TEXT("gauche"));
 			PlayerRef->CanLDash = true;
 			PlayerRef->CanRDash = false; 
 		}
 		else if(DirectionValue == 1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("droite"));
+			//UE_LOG(LogTemp, Warning, TEXT("droite"));
 			PlayerRef->CanRDash = true;
 			PlayerRef->CanLDash = false; 
 			//PlayerRef->CanLDash = true; 

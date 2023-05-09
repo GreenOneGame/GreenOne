@@ -14,8 +14,8 @@ struct FertilizerTankStruct
 
 	FertilizerTankStruct();
 
-	UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
-	FertilizerType Type;
+	// UPROPERTY(EditAnywhere, Category = "Custom|Fertilizer|Tank|Properties")
+	// FertilizerType Type;
 	
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 100), Category = "Custom|Fertilizer|Tank|Properties")
 	float MaxGaugeValue = 100.f;
@@ -100,7 +100,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitUIFertilizer();
 	void Equip();
+	UFUNCTION(BlueprintCallable)
+	void Unlock(const FertilizerType Type);
 	void SwitchFertilizerEquip();
+	bool IsFertilizerActve() const;
 
 	FertilizerType GetCurrentFertilizerType() const;
 	

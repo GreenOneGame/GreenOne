@@ -55,6 +55,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", DisplayName = "Activer la réinitialisation du coolDown")
 	bool bDelayToResetCoolDown = true;
+
+	
+	
 	/** Valeur du delai pour la réinitialisation du cooldown */
 	UPROPERTY(EditAnywhere, Category = "Fight|Melee|CoolDown", meta = (EditCondition="bDelayToResetCoolDown"), DisplayName = "Delay reset coolDown")
 	float MaxDelayToResetCoolDown;
@@ -82,7 +85,8 @@ private:
 	
 	UFUNCTION()
 	bool Conetrace(TArray<FHitResult>& TargetHits);
- 
+
+	UFUNCTION(BlueprintCallable)
 	void DetectActors();
 	void ApplyImpulseForce(TArray<FHitResult>& ActorsHit);
 	void SetCoolDown(float DeltaTime);

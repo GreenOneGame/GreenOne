@@ -2,6 +2,8 @@
 
 rmdir /s /q Saved
 
+rmdir /s /q Build
+
 rmdir /s /q Intermediate
 
 rmdir /s /q DerivedDataCache

@@ -113,6 +113,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool IsAtk;
 
+	UPROPERTY(EditAnywhere, Category = "Debug")
+		bool Immortal = false;
+	
 	/**
 	 * Return une valeur entre 0 et 1 correspondant au percentage de la vie du joueur.
 	 */
@@ -140,8 +143,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Health");
 	float MaxHealth = 100;
 
+	UPROPERTY()
 	FVector2D MovementVector = FVector2D(0.f, 0.f);
+
+	UPROPERTY()
 	FVector ForwardDirection = FVector(0.f, 0.f, 0.f);
+
+	UPROPERTY()
 	FVector RightDirection = FVector(0.f, 0.f, 0.f);
 
 	/** 
@@ -174,6 +182,7 @@ protected:
 
 private:
 
+	UPROPERTY()
 	bool bIsDead = false;
 
 	void PlayerDead();
@@ -190,10 +199,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool Invisible = false;
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool Immortal = false;
-
+	
 	UFUNCTION()
 	void Respawn();
 
@@ -234,6 +240,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Custom|Important")
 	class UNiagaraSystem* ShootParticule;
 
+	UPROPERTY()
 	class UFertilizerTankComponent* FertilizerTankComponent;
 
 	/**
@@ -282,16 +289,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Custom|Combat")
 	float ShootCooldownRemaining;
 
+	UPROPERTY()
 	class USoundBase* ShootSound;
 
 private:
 
+	UPROPERTY()
 	FVector LocationToAim;
 
+	UPROPERTY()
 	bool IsTouchSomething;
 
+	UPROPERTY()
 	bool CanShoot;
 
+	UPROPERTY()
 	FTimerHandle ShootHandler;
 
 	void ShootRafale();
@@ -306,6 +318,9 @@ private:
 public:
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(EditAnywhere, Category = "Fight|Melee", DisplayName = "Activer l'animation du kick")
+	bool CanAnimKick = false;
 	
 	UFUNCTION(BlueprintCallable)
 	void CanRegenerate();
@@ -318,8 +333,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRegen OnRegen;
+
+	UFUNCTION(BlueprintCallable)
+	void ResetAttackCac();
 	
 private:
+
+	UPROPERTY()
 	FTimerHandle TimerRegen;
 	/** Valeur d'incrémentation du cooldown après chaque attaque */
 	UPROPERTY(EditAnywhere, Category = "Custom|Player|RegeneateHealth", DisplayName = "Valeur de temps apres avoir ete en mode attack")
@@ -338,6 +358,7 @@ public:
 
 private:
 
+	UPROPERTY()
 	class UUserWidget* PauseWidgetRef;
 
 #pragma endregion
