@@ -37,13 +37,53 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCollision();
+
+	UFUNCTION(BlueprintCallable)
 	void SetRCollision();
+
+	UFUNCTION(BlueprintCallable)
 	void SetLCollision();
+
+	UFUNCTION(BlueprintCallable)
 	void EndCollision();
+
+	UFUNCTION(BlueprintCallable)
 	void LEndCollision();
+
+	UFUNCTION(BlueprintCallable)
 	void REndCollision();
+
+	UFUNCTION(BlueprintCallable)
+	void EndAnimation();
+
+	UFUNCTION(BlueprintCallable)
+	void SetFight();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsWaiting() const {return bIsWaiting;};
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsTouch() const {return bIsTouch;};
+
+	int FightMStatus;
+
+	UFUNCTION(BlueprintCallable)
+	void HitCheck();
+
+	UFUNCTION()
+	void SetMoveFight();
 	
+	UPROPERTY()
+	bool bIsWaiting = true;
 private:
+
+	int FightStatus = 0;
+
+	bool FormSecond = false;
+
+
+	UPROPERTY()
+	bool bIsTouch = false;
 	
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* R_ArmCollider;

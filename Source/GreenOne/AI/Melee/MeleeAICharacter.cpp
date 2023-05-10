@@ -129,6 +129,70 @@ void AMeleeAICharacter::REndCollision()
 	}
 }
 
+void AMeleeAICharacter::EndAnimation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("End Animation"));
+	CanM_Fighting = false;
+	CanMR_Fighting = false;
+	Can_Fighting = false;
+	CanR_Fighting = false;
+	return;
+}
+
+void AMeleeAICharacter::SetMoveFight()
+{
+	CanM_Fighting = true;
+
+	FormSecond = false;
+	if (FightMStatus == -1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("mouv gauche"));
+		FightStatus = -1;
+		SetRCollision();
+		CanR_Fighting = true;
+	}
+	else if (FightMStatus == 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("mouv droite"));
+		CanMR_Fighting = true;
+		FightStatus = 1;
+		SetLCollision();
+	}
+}
+
+void AMeleeAICharacter::SetFight()
+{
+	UE_LOG(LogTemp, Warning, TEXT("setfight"));
+	Can_Fighting = true;
+	if (FightStatus == -1)
+	{
+		SetRCollision();
+		CanR_Fighting = true;
+		UE_LOG(LogTemp, Warning, TEXT("id_fightR"));
+
+	}
+	if (FightStatus == 1)
+		SetLCollision();
+
+		FormSecond = true;
+}
+
+void AMeleeAICharacter::HitCheck()
+{
+	if (FormSecond)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StopAttack"))
+			bIsWaiting = false;
+		bIsTouch = true;
+	}
+	else if (CanCombo == true)
+	{
+		StopMouv();
+		UE_LOG(LogTemp, Warning, TEXT("Can Combo"));
+		SetFight();
+	}
+}
+
 void AMeleeAICharacter::StopMouv()
 {
 	if ( CanCombo == true)
@@ -175,6 +239,7 @@ void AMeleeAICharacter::OnCompHit(UPrimitiveComponent* OverlappedComp, AActor* O
 			//UE_LOG(LogTemp, Warning, TEXT("HitActor : %s"), *CurrentPlayerRef->GetFName().ToString());
 			IEntityGame::Execute_EntityTakeDamage(CurrentPlayerRef, Damage, SweepResult.BoneName, this);
 			EndCollision();
+			CanCombo = false;
 			return;
 		}
 	}
