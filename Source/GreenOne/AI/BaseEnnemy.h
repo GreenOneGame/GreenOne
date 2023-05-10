@@ -148,4 +148,10 @@ protected:
 	virtual void DeadEntity();
 	void DestroyActor();
 
+	UFUNCTION()
+	void Truc();
+
+	UPROPERTY()
+	class UEffect* TargetEffect;
+
 };

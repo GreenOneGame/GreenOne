@@ -74,15 +74,8 @@ void ABaseEnnemy::EntityTakeEffect_Implementation(UEffect* Effect, AActor* Sourc
 
 void ABaseEnnemy::ResetEffect(UEffect* Effect, const float DelayToReset)
 {
-	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, [=]()
-		{
-			UpdateMaxSpeed(MaxSpeed);
-			ResetParticleEffect(Effect->GetParticleEffect());
-			ResetMaterialEffect();
-		
-			ExplosionEffect();	
-			
-		}, DelayToReset, false);
+	TargetEffect = Effect;
+	GetWorld()->GetTimerManager().SetTimer(TimeToResetEffect, this, &ABaseEnnemy::Truc, DelayToReset, false);
 }
 
 void ABaseEnnemy::ResetParticleEffect(UNiagaraSystem* Particle) const
@@ -249,4 +242,17 @@ void ABaseEnnemy::DestroyActor()
 	{
 		this->Destroy();
 	}
+}
+
+void ABaseEnnemy::Truc()
+{
+	UpdateMaxSpeed(MaxSpeed);
+	if (TargetEffect != nullptr)
+	{
+		ResetParticleEffect(TargetEffect->GetParticleEffect());
+	}
+	ResetMaterialEffect();
+
+	ExplosionEffect();
+
 }
